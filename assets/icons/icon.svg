@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#2563eb"/>
+      <stop offset="100%" style="stop-color:#1d4ed8"/>
+    </linearGradient>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="256" height="256" rx="48" fill="url(#bgGrad)"/>
+  
+  <!-- Monitor -->
+  <rect x="40" y="50" width="176" height="120" rx="8" fill="#0f172a" stroke="#fff" stroke-width="4"/>
+  
+  <!-- Screen content lines -->
+  <rect x="56" y="70" width="80" height="6" rx="3" fill="#3b82f6"/>
+  <rect x="56" y="86" width="144" height="6" rx="3" fill="#64748b"/>
+  <rect x="56" y="102" width="120" height="6" rx="3" fill="#64748b"/>
+  <rect x="56" y="118" width="144" height="6" rx="3" fill="#64748b"/>
+  <rect x="56" y="134" width="100" height="6" rx="3" fill="#64748b"/>
+  
+  <!-- Monitor stand -->
+  <rect x="108" y="170" width="40" height="12" fill="#0f172a"/>
+  <rect x="88" y="182" width="80" height="8" rx="4" fill="#0f172a"/>
+  
+  <!-- Broadcast waves -->
+  <path d="M200 90 Q220 100 200 110" stroke="#22c55e" stroke-width="4" fill="none" stroke-linecap="round"/>
+  <path d="M210 80 Q240 100 210 120" stroke="#22c55e" stroke-width="4" fill="none" stroke-linecap="round"/>
+  <path d="M220 70 Q260 100 220 130" stroke="#22c55e" stroke-width="4" fill="none" stroke-linecap="round"/>
+  
+  <!-- Connection dot -->
+  <circle cx="196" cy="100" r="6" fill="#22c55e"/>
+</svg>
