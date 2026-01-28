@@ -1,0 +1,218 @@
+@use 'variables' as *;
+
+// Flexbox mixins
+@mixin flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@mixin flex-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+@mixin flex-column {
+  display: flex;
+  flex-direction: column;
+}
+
+@mixin flex-column-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+// Button mixins
+@mixin button-base {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: $spacing-sm $spacing-md;
+  font-size: $font-size-md;
+  font-weight: $font-weight-medium;
+  border-radius: $radius-md;
+  border: none;
+  cursor: pointer;
+  transition: all $transition-fast;
+  gap: $spacing-sm;
+  
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  
+  &:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba($color-primary, 0.3);
+  }
+}
+
+@mixin button-primary {
+  @include button-base;
+  background-color: $color-primary;
+  color: $text-light;
+  
+  &:hover:not(:disabled) {
+    background-color: $color-primary-dark;
+  }
+  
+  &:active:not(:disabled) {
+    transform: scale(0.98);
+  }
+}
+
+@mixin button-secondary {
+  @include button-base;
+  background-color: $bg-dark-tertiary;
+  color: $text-light;
+  
+  &:hover:not(:disabled) {
+    background-color: $bg-dark-secondary;
+  }
+}
+
+@mixin button-danger {
+  @include button-base;
+  background-color: $color-danger;
+  color: $text-light;
+  
+  &:hover:not(:disabled) {
+    background-color: $color-danger-dark;
+  }
+}
+
+@mixin button-ghost {
+  @include button-base;
+  background-color: transparent;
+  color: $text-light-secondary;
+  
+  &:hover:not(:disabled) {
+    background-color: rgba(255, 255, 255, 0.1);
+  }
+}
+
+// Card mixin
+@mixin card {
+  background-color: $bg-dark-secondary;
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+  box-shadow: $shadow-md;
+}
+
+// Input mixin
+@mixin input-base {
+  width: 100%;
+  padding: $spacing-sm $spacing-md;
+  font-size: $font-size-md;
+  font-family: $font-family;
+  background-color: $bg-dark-tertiary;
+  border: 2px solid transparent;
+  border-radius: $radius-md;
+  color: $text-light;
+  transition: border-color $transition-fast, box-shadow $transition-fast;
+  
+  &::placeholder {
+    color: $text-light-muted;
+  }
+  
+  &:focus {
+    outline: none;
+    border-color: $color-primary;
+    box-shadow: 0 0 0 3px rgba($color-primary, 0.2);
+  }
+  
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+// Text truncation
+@mixin text-truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+// Scrollbar styling
+@mixin custom-scrollbar {
+  &::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  
+  &::-webkit-scrollbar-track {
+    background: $bg-dark-tertiary;
+    border-radius: $radius-full;
+  }
+  
+  &::-webkit-scrollbar-thumb {
+    background: $color-secondary;
+    border-radius: $radius-full;
+    
+    &:hover {
+      background: $color-secondary-light;
+    }
+  }
+}
+
+// Animation mixins
+@mixin fade-in($duration: $transition-normal) {
+  animation: fadeIn $duration ease forwards;
+}
+
+@mixin slide-up($duration: $transition-normal) {
+  animation: slideUp $duration ease forwards;
+}
+
+@mixin pulse {
+  animation: pulse 2s infinite;
+}
+
+// Status indicator
+@mixin status-dot($color) {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: $radius-full;
+  background-color: $color;
+}
+
+// Overlay
+@mixin overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+}
+
+// Responsive breakpoints
+@mixin sm {
+  @media (min-width: $breakpoint-sm) {
+    @content;
+  }
+}
+
+@mixin md {
+  @media (min-width: $breakpoint-md) {
+    @content;
+  }
+}
+
+@mixin lg {
+  @media (min-width: $breakpoint-lg) {
+    @content;
+  }
+}
+
+@mixin xl {
+  @media (min-width: $breakpoint-xl) {
+    @content;
+  }
+}

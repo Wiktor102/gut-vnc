@@ -1,0 +1,12 @@
+module.exports = {
+  presets: [
+    ['@babel/preset-env', { 
+      targets: { electron: '28' },
+      modules: false
+    }],
+    ['@babel/preset-react', { 
+      runtime: 'automatic'
+    }],
+    '@babel/preset-typescript'
+  ]
+};
