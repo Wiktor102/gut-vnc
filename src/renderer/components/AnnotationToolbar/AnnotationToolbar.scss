@@ -1,0 +1,138 @@
+@use '../../styles/variables' as *;
+@use '../../styles/mixins' as *;
+
+.annotation-toolbar {
+  padding: $spacing-md;
+  border-bottom: 1px solid $bg-dark-tertiary;
+  
+  &__title {
+    font-size: $font-size-sm;
+    font-weight: $font-weight-semibold;
+    color: $text-light;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: $spacing-md;
+  }
+  
+  &__tools {
+    display: flex;
+    flex-wrap: wrap;
+    gap: $spacing-xs;
+    align-items: center;
+  }
+  
+  &__tool {
+    @include flex-center;
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    background-color: $bg-dark-tertiary;
+    border: 2px solid transparent;
+    border-radius: $radius-md;
+    color: $text-light-secondary;
+    cursor: pointer;
+    transition: all $transition-fast;
+    
+    svg {
+      width: 18px;
+      height: 18px;
+    }
+    
+    &:hover {
+      background-color: rgba($color-primary, 0.1);
+      border-color: rgba($color-primary, 0.3);
+      color: $text-light;
+    }
+    
+    &--active {
+      background-color: rgba($color-primary, 0.2);
+      border-color: $color-primary;
+      color: $color-primary;
+    }
+  }
+  
+  &__divider {
+    width: 1px;
+    height: 24px;
+    background-color: $bg-dark-tertiary;
+    margin: 0 $spacing-xs;
+  }
+  
+  &__color-picker {
+    position: relative;
+  }
+  
+  &__color-btn {
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    border: 2px solid $bg-dark-tertiary;
+    border-radius: $radius-md;
+    cursor: pointer;
+    transition: border-color $transition-fast;
+    
+    &:hover {
+      border-color: $text-light-muted;
+    }
+  }
+  
+  &__colors {
+    position: absolute;
+    top: calc(100% + #{$spacing-xs});
+    left: 50%;
+    transform: translateX(-50%);
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: $spacing-xs;
+    padding: $spacing-sm;
+    background-color: $bg-dark-secondary;
+    border: 1px solid $bg-dark-tertiary;
+    border-radius: $radius-md;
+    box-shadow: $shadow-lg;
+    z-index: $z-dropdown;
+    animation: fadeIn 0.15s ease;
+  }
+  
+  &__color {
+    width: 24px;
+    height: 24px;
+    padding: 0;
+    border: 2px solid transparent;
+    border-radius: $radius-sm;
+    cursor: pointer;
+    transition: transform $transition-fast, border-color $transition-fast;
+    
+    &:hover {
+      transform: scale(1.15);
+    }
+    
+    &--active {
+      border-color: $text-light;
+    }
+  }
+  
+  &__clear {
+    @include flex-center;
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    background-color: $bg-dark-tertiary;
+    border: 2px solid transparent;
+    border-radius: $radius-md;
+    color: $text-light-muted;
+    cursor: pointer;
+    transition: all $transition-fast;
+    margin-left: auto;
+    
+    svg {
+      width: 18px;
+      height: 18px;
+    }
+    
+    &:hover {
+      background-color: rgba($color-danger, 0.15);
+      border-color: rgba($color-danger, 0.3);
+      color: $color-danger;
+    }
+  }
+}

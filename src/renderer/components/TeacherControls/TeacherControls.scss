@@ -1,0 +1,82 @@
+@use '../../styles/variables' as *;
+@use '../../styles/mixins' as *;
+
+.teacher-controls {
+  padding: $spacing-md;
+  border-bottom: 1px solid $bg-dark-tertiary;
+  
+  &__title {
+    font-size: $font-size-sm;
+    font-weight: $font-weight-semibold;
+    color: $text-light;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: $spacing-md;
+  }
+  
+  &__buttons {
+    @include flex-column;
+    gap: $spacing-xs;
+  }
+  
+  &__btn {
+    @include flex-center;
+    justify-content: flex-start;
+    gap: $spacing-sm;
+    width: 100%;
+    padding: $spacing-sm $spacing-md;
+    background-color: $bg-dark-tertiary;
+    border: 2px solid transparent;
+    border-radius: $radius-md;
+    color: $text-light-secondary;
+    font-size: $font-size-sm;
+    font-weight: $font-weight-medium;
+    cursor: pointer;
+    transition: all $transition-fast;
+    
+    svg {
+      width: 20px;
+      height: 20px;
+      flex-shrink: 0;
+    }
+    
+    &:hover {
+      background-color: rgba($color-primary, 0.1);
+      border-color: rgba($color-primary, 0.3);
+      color: $text-light;
+    }
+    
+    &--active {
+      background-color: rgba($color-success, 0.15);
+      border-color: $color-success;
+      color: $color-success;
+      
+      &:hover {
+        background-color: rgba($color-success, 0.2);
+        border-color: $color-success;
+      }
+    }
+    
+    &--warning {
+      background-color: rgba($color-warning, 0.15);
+      border-color: $color-warning;
+      color: $color-warning;
+      
+      &:hover {
+        background-color: rgba($color-warning, 0.2);
+        border-color: $color-warning;
+      }
+    }
+    
+    &--muted {
+      background-color: rgba($color-secondary, 0.15);
+      border-color: $color-secondary;
+      color: $text-light-muted;
+      
+      &:hover {
+        background-color: rgba($color-secondary, 0.2);
+        border-color: $color-secondary;
+      }
+    }
+  }
+}

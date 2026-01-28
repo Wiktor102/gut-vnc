@@ -1,0 +1,106 @@
+@use '../../styles/variables' as *;
+@use '../../styles/mixins' as *;
+
+.reaction-bar {
+  background-color: $bg-dark-secondary;
+  border-top: 1px solid $bg-dark-tertiary;
+  padding: $spacing-md $spacing-lg;
+  flex-shrink: 0;
+  
+  &__container {
+    @include flex-center;
+    gap: $spacing-lg;
+    max-width: 800px;
+    margin: 0 auto;
+  }
+  
+  &__label {
+    font-size: $font-size-sm;
+    color: $text-light-muted;
+    flex-shrink: 0;
+  }
+  
+  &__buttons {
+    @include flex-center;
+    gap: $spacing-sm;
+    flex: 1;
+    justify-content: center;
+  }
+  
+  &__btn {
+    @include flex-column-center;
+    gap: $spacing-xs;
+    padding: $spacing-sm $spacing-md;
+    background-color: $bg-dark-tertiary;
+    border: 2px solid transparent;
+    border-radius: $radius-lg;
+    cursor: pointer;
+    transition: all $transition-fast;
+    min-width: 80px;
+    
+    &:hover {
+      background-color: rgba($color-primary, 0.1);
+      border-color: rgba($color-primary, 0.3);
+      transform: translateY(-2px);
+    }
+    
+    &--active {
+      background-color: rgba($color-primary, 0.2);
+      border-color: $color-primary;
+      transform: translateY(-2px);
+      
+      .reaction-bar__icon {
+        animation: bounce 0.5s ease;
+      }
+    }
+  }
+  
+  &__icon {
+    font-size: 28px;
+    line-height: 1;
+  }
+  
+  &__btn-label {
+    font-size: $font-size-xs;
+    color: $text-light-muted;
+    
+    .reaction-bar__btn--active & {
+      color: $color-primary;
+    }
+  }
+  
+  &__clear {
+    @include button-ghost;
+    padding: $spacing-xs $spacing-sm;
+    font-size: $font-size-sm;
+    color: $text-light-muted;
+    flex-shrink: 0;
+    
+    &:hover {
+      color: $color-danger;
+    }
+  }
+}
+
+@media (max-width: $breakpoint-md) {
+  .reaction-bar {
+    &__container {
+      flex-wrap: wrap;
+      gap: $spacing-sm;
+    }
+    
+    &__label {
+      width: 100%;
+      text-align: center;
+    }
+    
+    &__btn {
+      min-width: 70px;
+      padding: $spacing-xs $spacing-sm;
+    }
+    
+    &__icon {
+      font-size: 24px;
+    }
+  }
+}

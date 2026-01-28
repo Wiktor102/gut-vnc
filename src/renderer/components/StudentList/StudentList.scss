@@ -1,0 +1,113 @@
+@use '../../styles/variables' as *;
+@use '../../styles/mixins' as *;
+
+.student-list {
+  @include flex-column;
+  gap: $spacing-xs;
+  
+  &--empty {
+    @include flex-column-center;
+    padding: $spacing-lg;
+    text-align: center;
+    
+    p {
+      color: $text-light-muted;
+      font-size: $font-size-sm;
+    }
+    
+    span {
+      color: $text-light-muted;
+      font-size: $font-size-xs;
+      margin-top: $spacing-xs;
+      opacity: 0.7;
+    }
+  }
+  
+  &__item {
+    @include flex-center;
+    gap: $spacing-sm;
+    padding: $spacing-sm;
+    background-color: $bg-dark-tertiary;
+    border-radius: $radius-md;
+    transition: background-color $transition-fast;
+    
+    &:hover {
+      background-color: rgba($color-primary, 0.1);
+      
+      .student-list__kick {
+        opacity: 1;
+      }
+    }
+  }
+  
+  &__avatar {
+    @include flex-center;
+    width: 32px;
+    height: 32px;
+    background: linear-gradient(135deg, $color-primary 0%, $color-primary-dark 100%);
+    border-radius: $radius-full;
+    font-size: $font-size-sm;
+    font-weight: $font-weight-bold;
+    color: $text-light;
+    flex-shrink: 0;
+  }
+  
+  &__info {
+    flex: 1;
+    min-width: 0;
+    @include flex-center;
+    gap: $spacing-sm;
+    justify-content: flex-start;
+  }
+  
+  &__name {
+    font-size: $font-size-sm;
+    color: $text-light;
+    @include text-truncate;
+  }
+  
+  &__status {
+    @include flex-center;
+    flex-shrink: 0;
+  }
+  
+  &__indicator {
+    width: 8px;
+    height: 8px;
+    border-radius: $radius-full;
+    
+    &--online {
+      background-color: $color-success;
+      box-shadow: 0 0 6px rgba($color-success, 0.5);
+    }
+    
+    &--offline {
+      background-color: $color-secondary;
+    }
+  }
+  
+  &__kick {
+    @include flex-center;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    background: none;
+    border: none;
+    border-radius: $radius-sm;
+    color: $text-light-muted;
+    cursor: pointer;
+    opacity: 0;
+    transition: all $transition-fast;
+    flex-shrink: 0;
+    
+    svg {
+      width: 16px;
+      height: 16px;
+    }
+    
+    &:hover {
+      background-color: rgba($color-danger, 0.2);
+      color: $color-danger;
+    }
+  }
+}
