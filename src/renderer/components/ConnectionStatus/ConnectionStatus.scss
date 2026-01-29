@@ -1,73 +1,73 @@
-@use '../../styles/variables' as *;
-@use '../../styles/mixins' as *;
+@use "../../styles/variables" as *;
+@use "../../styles/mixins" as *;
 
 .connection-status {
-  @include flex-center;
-  gap: $spacing-xs;
-  padding: $spacing-xs $spacing-sm;
-  border-radius: $radius-full;
-  font-size: $font-size-sm;
-  
-  &--connected {
-    background-color: rgba($color-success, 0.15);
-    
-    .connection-status__dot {
-      background-color: $color-success;
-      box-shadow: 0 0 6px rgba($color-success, 0.5);
-    }
-    
-    .connection-status__text {
-      color: $color-success;
-    }
-  }
-  
-  &--connecting {
-    background-color: rgba($color-warning, 0.15);
-    
-    .connection-status__dot {
-      background-color: $color-warning;
-    }
-    
-    .connection-status__text {
-      color: $color-warning;
-    }
-  }
-  
-  &--disconnected {
-    background-color: rgba($color-secondary, 0.15);
-    
-    .connection-status__dot {
-      background-color: $color-secondary;
-    }
-    
-    .connection-status__text {
-      color: $text-light-muted;
-    }
-  }
-  
-  &--error {
-    background-color: rgba($color-danger, 0.15);
-    
-    .connection-status__dot {
-      background-color: $color-danger;
-    }
-    
-    .connection-status__text {
-      color: $color-danger;
-    }
-  }
-  
-  &__dot {
-    width: 8px;
-    height: 8px;
-    border-radius: $radius-full;
-    
-    &--pulse {
-      animation: pulse 1.5s infinite;
-    }
-  }
-  
-  &__text {
-    font-weight: $font-weight-medium;
-  }
+	@include flex-center;
+	gap: $spacing-xs;
+	padding: $spacing-xs $spacing-sm;
+	border-radius: $radius-full;
+	font-size: $font-size-sm;
+
+	&--connected {
+		background-color: rgba($color-success, 0.15);
+
+		.connection-status__dot {
+			background-color: $color-success;
+			box-shadow: 0 0 6px rgba($color-success, 0.5);
+		}
+
+		.connection-status__text {
+			color: $color-success;
+		}
+	}
+
+	&--connecting {
+		background-color: rgba($color-warning, 0.15);
+
+		.connection-status__dot {
+			background-color: $color-warning;
+		}
+
+		.connection-status__text {
+			color: $color-warning;
+		}
+	}
+
+	&--disconnected {
+		background-color: rgba($color-secondary, 0.15);
+
+		.connection-status__dot {
+			background-color: $color-secondary;
+		}
+
+		.connection-status__text {
+			color: $text-light-muted;
+		}
+	}
+
+	&--error {
+		background-color: rgba($color-danger, 0.15);
+
+		.connection-status__dot {
+			background-color: $color-danger;
+		}
+
+		.connection-status__text {
+			color: $color-danger;
+		}
+	}
+
+	&__dot {
+		width: 8px;
+		height: 8px;
+		border-radius: $radius-full;
+
+		&--pulse {
+			animation: pulse 1.5s infinite;
+		}
+	}
+
+	&__text {
+		font-weight: $font-weight-medium;
+	}
 }

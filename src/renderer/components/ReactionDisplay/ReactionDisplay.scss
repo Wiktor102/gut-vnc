@@ -1,33 +1,33 @@
-@use '../../styles/variables' as *;
-@use '../../styles/mixins' as *;
+@use "../../styles/variables" as *;
+@use "../../styles/mixins" as *;
 
 .reaction-display {
-  @include flex-column;
-  gap: $spacing-xs;
-  
-  &--empty {
-    @include flex-center;
-    padding: $spacing-md;
-    
-    p {
-      color: $text-light-muted;
-      font-size: $font-size-sm;
-    }
-  }
-  
-  &__item {
-    @include flex-center;
-    gap: $spacing-sm;
-    padding: $spacing-xs $spacing-sm;
-    background-color: $bg-dark-tertiary;
-    border-radius: $radius-md;
-    animation: slideUp 0.3s ease;
-  }
-  
-  &__name {
-    flex: 1;
-    font-size: $font-size-sm;
-    color: $text-light;
-    @include text-truncate;
-  }
+	@include flex-column;
+	gap: $spacing-xs;
+
+	&--empty {
+		@include flex-center;
+		padding: $spacing-md;
+
+		p {
+			color: $text-light-muted;
+			font-size: $font-size-sm;
+		}
+	}
+
+	&__item {
+		@include flex-center;
+		gap: $spacing-sm;
+		padding: $spacing-xs $spacing-sm;
+		background-color: $bg-dark-tertiary;
+		border-radius: $radius-md;
+		animation: slideUp 0.3s ease;
+	}
+
+	&__name {
+		flex: 1;
+		font-size: $font-size-sm;
+		color: $text-light;
+		@include text-truncate;
+	}
 }

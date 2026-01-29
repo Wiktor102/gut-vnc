@@ -1,154 +1,218 @@
-@use 'reset';
-@use 'variables' as *;
-@use 'mixins' as *;
+@use "reset";
+@use "variables" as *;
+@use "mixins" as *;
 
-html, body, #root {
-  height: 100%;
-  width: 100%;
+html,
+body,
+#root {
+	height: 100%;
+	width: 100%;
 }
 
 body {
-  font-family: $font-family;
-  font-size: $font-size-md;
-  line-height: 1.5;
-  background-color: $bg-dark;
-  color: $text-light;
-  overflow: hidden;
-  user-select: none;
+	font-family: $font-family;
+	font-size: $font-size-md;
+	line-height: 1.5;
+	background-color: $bg-dark;
+	color: $text-light;
+	overflow: hidden;
+	user-select: none;
 }
 
 #root {
-  @include flex-column;
+	@include flex-column;
 }
 
 // Typography utilities
-.text-center { text-align: center; }
-.text-left { text-align: left; }
-.text-right { text-align: right; }
+.text-center {
+	text-align: center;
+}
+.text-left {
+	text-align: left;
+}
+.text-right {
+	text-align: right;
+}
 
-.text-xs { font-size: $font-size-xs; }
-.text-sm { font-size: $font-size-sm; }
-.text-md { font-size: $font-size-md; }
-.text-lg { font-size: $font-size-lg; }
-.text-xl { font-size: $font-size-xl; }
-.text-2xl { font-size: $font-size-2xl; }
-.text-3xl { font-size: $font-size-3xl; }
+.text-xs {
+	font-size: $font-size-xs;
+}
+.text-sm {
+	font-size: $font-size-sm;
+}
+.text-md {
+	font-size: $font-size-md;
+}
+.text-lg {
+	font-size: $font-size-lg;
+}
+.text-xl {
+	font-size: $font-size-xl;
+}
+.text-2xl {
+	font-size: $font-size-2xl;
+}
+.text-3xl {
+	font-size: $font-size-3xl;
+}
 
-.font-medium { font-weight: $font-weight-medium; }
-.font-semibold { font-weight: $font-weight-semibold; }
-.font-bold { font-weight: $font-weight-bold; }
+.font-medium {
+	font-weight: $font-weight-medium;
+}
+.font-semibold {
+	font-weight: $font-weight-semibold;
+}
+.font-bold {
+	font-weight: $font-weight-bold;
+}
 
-.text-muted { color: $text-light-muted; }
-.text-secondary { color: $text-light-secondary; }
+.text-muted {
+	color: $text-light-muted;
+}
+.text-secondary {
+	color: $text-light-secondary;
+}
 
 // Spacing utilities
-.mt-sm { margin-top: $spacing-sm; }
-.mt-md { margin-top: $spacing-md; }
-.mt-lg { margin-top: $spacing-lg; }
-.mt-xl { margin-top: $spacing-xl; }
+.mt-sm {
+	margin-top: $spacing-sm;
+}
+.mt-md {
+	margin-top: $spacing-md;
+}
+.mt-lg {
+	margin-top: $spacing-lg;
+}
+.mt-xl {
+	margin-top: $spacing-xl;
+}
 
-.mb-sm { margin-bottom: $spacing-sm; }
-.mb-md { margin-bottom: $spacing-md; }
-.mb-lg { margin-bottom: $spacing-lg; }
-.mb-xl { margin-bottom: $spacing-xl; }
+.mb-sm {
+	margin-bottom: $spacing-sm;
+}
+.mb-md {
+	margin-bottom: $spacing-md;
+}
+.mb-lg {
+	margin-bottom: $spacing-lg;
+}
+.mb-xl {
+	margin-bottom: $spacing-xl;
+}
 
-.gap-sm { gap: $spacing-sm; }
-.gap-md { gap: $spacing-md; }
-.gap-lg { gap: $spacing-lg; }
+.gap-sm {
+	gap: $spacing-sm;
+}
+.gap-md {
+	gap: $spacing-md;
+}
+.gap-lg {
+	gap: $spacing-lg;
+}
 
 // Keyframe animations
 @keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+	from {
+		opacity: 0;
+	}
+	to {
+		opacity: 1;
+	}
 }
 
 @keyframes slideUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+	from {
+		opacity: 0;
+		transform: translateY(20px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
 }
 
 @keyframes slideDown {
-  from {
-    opacity: 0;
-    transform: translateY(-20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+	from {
+		opacity: 0;
+		transform: translateY(-20px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
 }
 
 @keyframes pulse {
-  0%, 100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.5;
-  }
+	0%,
+	100% {
+		opacity: 1;
+	}
+	50% {
+		opacity: 0.5;
+	}
 }
 
 @keyframes spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+	from {
+		transform: rotate(0deg);
+	}
+	to {
+		transform: rotate(360deg);
+	}
 }
 
 @keyframes bounce {
-  0%, 100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-10px);
-  }
+	0%,
+	100% {
+		transform: translateY(0);
+	}
+	50% {
+		transform: translateY(-10px);
+	}
 }
 
 @keyframes shake {
-  0%, 100% {
-    transform: translateX(0);
-  }
-  10%, 30%, 50%, 70%, 90% {
-    transform: translateX(-5px);
-  }
-  20%, 40%, 60%, 80% {
-    transform: translateX(5px);
-  }
+	0%,
+	100% {
+		transform: translateX(0);
+	}
+	10%,
+	30%,
+	50%,
+	70%,
+	90% {
+		transform: translateX(-5px);
+	}
+	20%,
+	40%,
+	60%,
+	80% {
+		transform: translateX(5px);
+	}
 }
 
 // Scrollbar
 body {
-  @include custom-scrollbar;
+	@include custom-scrollbar;
 }
 
 // Selection
 ::selection {
-  background-color: rgba($color-primary, 0.3);
-  color: $text-light;
+	background-color: rgba($color-primary, 0.3);
+	color: $text-light;
 }
 
 // Focus visible
 :focus-visible {
-  outline: 2px solid $color-primary;
-  outline-offset: 2px;
+	outline: 2px solid $color-primary;
+	outline-offset: 2px;
 }
 
 // Drag region for Electron
 .drag-region {
-  -webkit-app-region: drag;
+	-webkit-app-region: drag;
 }
 
 .no-drag {
-  -webkit-app-region: no-drag;
+	-webkit-app-region: no-drag;
 }

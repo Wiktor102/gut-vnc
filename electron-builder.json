@@ -1,0 +1,56 @@
+{
+  "$schema": "https://raw.githubusercontent.com/electron-userland/electron-builder/master/packages/app-builder-lib/scheme.json",
+  "appId": "com.gut-vnc.app",
+  "productName": "GUT VNC",
+  "copyright": "Copyright © 2024",
+  "directories": {
+    "output": "release",
+    "buildResources": "assets"
+  },
+  "files": [
+    "dist/**/*",
+    "assets/**/*",
+    "!node_modules/**/*",
+    "node_modules/bonjour-service/**/*",
+    "node_modules/ws/**/*",
+    "node_modules/uuid/**/*"
+  ],
+  "extraResources": [
+    {
+      "from": "assets",
+      "to": "assets",
+      "filter": ["**/*"]
+    }
+  ],
+  "win": {
+    "target": [
+      {
+        "target": "nsis",
+        "arch": ["x64"]
+      },
+      {
+        "target": "portable",
+        "arch": ["x64"]
+      }
+    ],
+    "icon": "assets/icons/icon.ico",
+    "artifactName": "${productName}-${version}-${arch}.${ext}"
+  },
+  "nsis": {
+    "oneClick": false,
+    "allowToChangeInstallationDirectory": true,
+    "installerLanguages": ["pl", "en"],
+    "language": "1045",
+    "perMachine": false,
+    "createDesktopShortcut": true,
+    "createStartMenuShortcut": true,
+    "shortcutName": "GUT VNC",
+    "installerIcon": "assets/icons/icon.ico",
+    "uninstallerIcon": "assets/icons/icon.ico",
+    "installerHeaderIcon": "assets/icons/icon.ico"
+  },
+  "portable": {
+    "artifactName": "${productName}-${version}-portable.${ext}"
+  },
+  "publish": null
+}

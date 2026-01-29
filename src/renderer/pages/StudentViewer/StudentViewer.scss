@@ -1,275 +1,275 @@
-@use '../../styles/variables' as *;
-@use '../../styles/mixins' as *;
+@use "../../styles/variables" as *;
+@use "../../styles/mixins" as *;
 
 .student-viewer {
-  @include flex-column;
-  height: 100vh;
-  background-color: $bg-dark;
-  
-  &--viewing {
-    overflow: hidden;
-  }
-  
-  // Setup screens
-  &__setup {
-    @include flex-column-center;
-    flex: 1;
-    padding: $spacing-lg;
-    position: relative;
-  }
-  
-  &__back {
-    @include button-ghost;
-    position: absolute;
-    top: $spacing-lg;
-    left: $spacing-lg;
-    gap: $spacing-xs;
-    
-    svg {
-      width: 20px;
-      height: 20px;
-    }
-  }
-  
-  &__setup-card {
-    @include card;
-    width: 100%;
-    max-width: 450px;
-    animation: slideUp 0.4s ease;
-  }
-  
-  &__title {
-    font-size: $font-size-2xl;
-    font-weight: $font-weight-bold;
-    color: $text-light;
-    margin-bottom: $spacing-xl;
-    text-align: center;
-  }
-  
-  &__form {
-    @include flex-column;
-    gap: $spacing-md;
-  }
-  
-  &__field {
-    @include flex-column;
-    gap: $spacing-xs;
-    
-    label {
-      font-size: $font-size-sm;
-      font-weight: $font-weight-medium;
-      color: $text-light-secondary;
-    }
-    
-    input {
-      @include input-base;
-    }
-  }
-  
-  &__error {
-    padding: $spacing-sm $spacing-md;
-    background-color: rgba($color-danger, 0.15);
-    border: 1px solid $color-danger;
-    border-radius: $radius-md;
-    color: $color-danger;
-    font-size: $font-size-sm;
-  }
-  
-  &__submit {
-    @include button-primary;
-    width: 100%;
-    padding: $spacing-md;
-    margin-top: $spacing-sm;
-  }
-  
-  // Teacher discovery
-  &__searching {
-    @include flex-column-center;
-    padding: $spacing-xl;
-    gap: $spacing-md;
-    
-    p {
-      color: $text-light-muted;
-    }
-  }
-  
-  &__spinner {
-    width: 40px;
-    height: 40px;
-    border: 3px solid $bg-dark-tertiary;
-    border-top-color: $color-primary;
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-  }
-  
-  &__teachers {
-    @include flex-column;
-    gap: $spacing-sm;
-    margin-bottom: $spacing-lg;
-  }
-  
-  &__teacher {
-    @include flex-center;
-    gap: $spacing-md;
-    width: 100%;
-    padding: $spacing-md;
-    background-color: $bg-dark-tertiary;
-    border: 2px solid transparent;
-    border-radius: $radius-md;
-    cursor: pointer;
-    transition: all $transition-fast;
-    text-align: left;
-    
-    &:hover {
-      background-color: rgba($color-primary, 0.1);
-      border-color: $color-primary;
-    }
-  }
-  
-  &__teacher-icon {
-    @include flex-center;
-    width: 48px;
-    height: 48px;
-    background-color: rgba($color-primary, 0.15);
-    border-radius: $radius-md;
-    color: $color-primary;
-    flex-shrink: 0;
-    
-    svg {
-      width: 24px;
-      height: 24px;
-    }
-  }
-  
-  &__teacher-info {
-    @include flex-column;
-    flex: 1;
-    gap: 2px;
-  }
-  
-  &__teacher-name {
-    font-size: $font-size-md;
-    font-weight: $font-weight-semibold;
-    color: $text-light;
-  }
-  
-  &__teacher-room {
-    font-size: $font-size-sm;
-    color: $text-light-muted;
-  }
-  
-  &__teacher-arrow {
-    width: 20px;
-    height: 20px;
-    color: $text-light-muted;
-    flex-shrink: 0;
-  }
-  
-  &__no-teachers {
-    @include flex-center;
-    padding: $spacing-xl;
-    
-    p {
-      color: $text-light-muted;
-    }
-  }
-  
-  &__refresh {
-    @include button-secondary;
-    width: 100%;
-    gap: $spacing-sm;
-    
-    svg {
-      width: 18px;
-      height: 18px;
-    }
-  }
-  
-  // Viewing layout
-  &__header {
-    @include flex-between;
-    padding: $spacing-sm $spacing-lg;
-    background-color: $bg-dark-secondary;
-    border-bottom: 1px solid $bg-dark-tertiary;
-    flex-shrink: 0;
-  }
-  
-  &__header-left {
-    @include flex-center;
-    gap: $spacing-md;
-  }
-  
-  &__header-right {
-    @include flex-center;
-    gap: $spacing-md;
-  }
-  
-  &__room-name {
-    font-size: $font-size-lg;
-    font-weight: $font-weight-semibold;
-    color: $text-light;
-  }
-  
-  &__teacher-name-display {
-    font-size: $font-size-sm;
-    color: $text-light-muted;
-  }
-  
-  &__leave-btn {
-    @include button-danger;
-    padding: $spacing-xs $spacing-md;
-    font-size: $font-size-sm;
-  }
-  
-  &__main {
-    display: flex;
-    flex: 1;
-    overflow: hidden;
-    position: relative;
-  }
-  
-  &__screen {
-    @include flex-center;
-    flex: 1;
-    background-color: #000;
-    position: relative;
-  }
-  
-  &__video {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-    background-color: #000;
-  }
-  
-  &__blank,
-  &__paused {
-    @include flex-column-center;
-    gap: $spacing-md;
-    color: $text-light-muted;
-    
-    svg {
-      width: 64px;
-      height: 64px;
-      opacity: 0.5;
-    }
-    
-    span {
-      font-size: $font-size-2xl;
-      font-weight: $font-weight-bold;
-    }
-  }
-  
-  &__reactions-panel {
-    position: absolute;
-    top: $spacing-md;
-    right: $spacing-md;
-    width: 200px;
-    max-height: 300px;
-    overflow-y: auto;
-    background-color: rgba($bg-dark-secondary, 0.9);
-    border-radius: $radius-lg;
-    padding: $spacing-sm;
-    @include custom-scrollbar;
-  }
+	@include flex-column;
+	height: 100vh;
+	background-color: $bg-dark;
+
+	&--viewing {
+		overflow: hidden;
+	}
+
+	// Setup screens
+	&__setup {
+		@include flex-column-center;
+		flex: 1;
+		padding: $spacing-lg;
+		position: relative;
+	}
+
+	&__back {
+		@include button-ghost;
+		position: absolute;
+		top: $spacing-lg;
+		left: $spacing-lg;
+		gap: $spacing-xs;
+
+		svg {
+			width: 20px;
+			height: 20px;
+		}
+	}
+
+	&__setup-card {
+		@include card;
+		width: 100%;
+		max-width: 450px;
+		animation: slideUp 0.4s ease;
+	}
+
+	&__title {
+		font-size: $font-size-2xl;
+		font-weight: $font-weight-bold;
+		color: $text-light;
+		margin-bottom: $spacing-xl;
+		text-align: center;
+	}
+
+	&__form {
+		@include flex-column;
+		gap: $spacing-md;
+	}
+
+	&__field {
+		@include flex-column;
+		gap: $spacing-xs;
+
+		label {
+			font-size: $font-size-sm;
+			font-weight: $font-weight-medium;
+			color: $text-light-secondary;
+		}
+
+		input {
+			@include input-base;
+		}
+	}
+
+	&__error {
+		padding: $spacing-sm $spacing-md;
+		background-color: rgba($color-danger, 0.15);
+		border: 1px solid $color-danger;
+		border-radius: $radius-md;
+		color: $color-danger;
+		font-size: $font-size-sm;
+	}
+
+	&__submit {
+		@include button-primary;
+		width: 100%;
+		padding: $spacing-md;
+		margin-top: $spacing-sm;
+	}
+
+	// Teacher discovery
+	&__searching {
+		@include flex-column-center;
+		padding: $spacing-xl;
+		gap: $spacing-md;
+
+		p {
+			color: $text-light-muted;
+		}
+	}
+
+	&__spinner {
+		width: 40px;
+		height: 40px;
+		border: 3px solid $bg-dark-tertiary;
+		border-top-color: $color-primary;
+		border-radius: 50%;
+		animation: spin 1s linear infinite;
+	}
+
+	&__teachers {
+		@include flex-column;
+		gap: $spacing-sm;
+		margin-bottom: $spacing-lg;
+	}
+
+	&__teacher {
+		@include flex-center;
+		gap: $spacing-md;
+		width: 100%;
+		padding: $spacing-md;
+		background-color: $bg-dark-tertiary;
+		border: 2px solid transparent;
+		border-radius: $radius-md;
+		cursor: pointer;
+		transition: all $transition-fast;
+		text-align: left;
+
+		&:hover {
+			background-color: rgba($color-primary, 0.1);
+			border-color: $color-primary;
+		}
+	}
+
+	&__teacher-icon {
+		@include flex-center;
+		width: 48px;
+		height: 48px;
+		background-color: rgba($color-primary, 0.15);
+		border-radius: $radius-md;
+		color: $color-primary;
+		flex-shrink: 0;
+
+		svg {
+			width: 24px;
+			height: 24px;
+		}
+	}
+
+	&__teacher-info {
+		@include flex-column;
+		flex: 1;
+		gap: 2px;
+	}
+
+	&__teacher-name {
+		font-size: $font-size-md;
+		font-weight: $font-weight-semibold;
+		color: $text-light;
+	}
+
+	&__teacher-room {
+		font-size: $font-size-sm;
+		color: $text-light-muted;
+	}
+
+	&__teacher-arrow {
+		width: 20px;
+		height: 20px;
+		color: $text-light-muted;
+		flex-shrink: 0;
+	}
+
+	&__no-teachers {
+		@include flex-center;
+		padding: $spacing-xl;
+
+		p {
+			color: $text-light-muted;
+		}
+	}
+
+	&__refresh {
+		@include button-secondary;
+		width: 100%;
+		gap: $spacing-sm;
+
+		svg {
+			width: 18px;
+			height: 18px;
+		}
+	}
+
+	// Viewing layout
+	&__header {
+		@include flex-between;
+		padding: $spacing-sm $spacing-lg;
+		background-color: $bg-dark-secondary;
+		border-bottom: 1px solid $bg-dark-tertiary;
+		flex-shrink: 0;
+	}
+
+	&__header-left {
+		@include flex-center;
+		gap: $spacing-md;
+	}
+
+	&__header-right {
+		@include flex-center;
+		gap: $spacing-md;
+	}
+
+	&__room-name {
+		font-size: $font-size-lg;
+		font-weight: $font-weight-semibold;
+		color: $text-light;
+	}
+
+	&__teacher-name-display {
+		font-size: $font-size-sm;
+		color: $text-light-muted;
+	}
+
+	&__leave-btn {
+		@include button-danger;
+		padding: $spacing-xs $spacing-md;
+		font-size: $font-size-sm;
+	}
+
+	&__main {
+		display: flex;
+		flex: 1;
+		overflow: hidden;
+		position: relative;
+	}
+
+	&__screen {
+		@include flex-center;
+		flex: 1;
+		background-color: #000;
+		position: relative;
+	}
+
+	&__video {
+		width: 100%;
+		height: 100%;
+		object-fit: contain;
+		background-color: #000;
+	}
+
+	&__blank,
+	&__paused {
+		@include flex-column-center;
+		gap: $spacing-md;
+		color: $text-light-muted;
+
+		svg {
+			width: 64px;
+			height: 64px;
+			opacity: 0.5;
+		}
+
+		span {
+			font-size: $font-size-2xl;
+			font-weight: $font-weight-bold;
+		}
+	}
+
+	&__reactions-panel {
+		position: absolute;
+		top: $spacing-md;
+		right: $spacing-md;
+		width: 200px;
+		max-height: 300px;
+		overflow-y: auto;
+		background-color: rgba($bg-dark-secondary, 0.9);
+		border-radius: $radius-lg;
+		padding: $spacing-sm;
+		@include custom-scrollbar;
+	}
 }

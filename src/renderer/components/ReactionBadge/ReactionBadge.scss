@@ -1,66 +1,66 @@
-@use '../../styles/variables' as *;
-@use '../../styles/mixins' as *;
+@use "../../styles/variables" as *;
+@use "../../styles/mixins" as *;
 
 .reaction-badge {
-  @include flex-center;
-  gap: $spacing-xs;
-  padding: 2px $spacing-xs;
-  border-radius: $radius-sm;
-  animation: slideUp 0.3s ease;
-  
-  &--small {
-    .reaction-badge__icon {
-      font-size: 14px;
-    }
-    .reaction-badge__label {
-      font-size: $font-size-xs;
-    }
-  }
-  
-  &--medium {
-    padding: $spacing-xs $spacing-sm;
-    
-    .reaction-badge__icon {
-      font-size: 18px;
-    }
-    .reaction-badge__label {
-      font-size: $font-size-sm;
-    }
-  }
-  
-  &--large {
-    padding: $spacing-sm $spacing-md;
-    
-    .reaction-badge__icon {
-      font-size: 24px;
-    }
-    .reaction-badge__label {
-      font-size: $font-size-md;
-    }
-  }
-  
-  &--hand {
-    background-color: rgba($color-warning, 0.2);
-  }
-  
-  &--thumbsUp {
-    background-color: rgba($color-success, 0.2);
-  }
-  
-  &--question {
-    background-color: rgba($color-info, 0.2);
-  }
-  
-  &--confused {
-    background-color: rgba($color-danger, 0.2);
-  }
-  
-  &__icon {
-    line-height: 1;
-  }
-  
-  &__label {
-    color: $text-light;
-    font-weight: $font-weight-medium;
-  }
+	@include flex-center;
+	gap: $spacing-xs;
+	padding: 2px $spacing-xs;
+	border-radius: $radius-sm;
+	animation: slideUp 0.3s ease;
+
+	&--small {
+		.reaction-badge__icon {
+			font-size: 14px;
+		}
+		.reaction-badge__label {
+			font-size: $font-size-xs;
+		}
+	}
+
+	&--medium {
+		padding: $spacing-xs $spacing-sm;
+
+		.reaction-badge__icon {
+			font-size: 18px;
+		}
+		.reaction-badge__label {
+			font-size: $font-size-sm;
+		}
+	}
+
+	&--large {
+		padding: $spacing-sm $spacing-md;
+
+		.reaction-badge__icon {
+			font-size: 24px;
+		}
+		.reaction-badge__label {
+			font-size: $font-size-md;
+		}
+	}
+
+	&--hand {
+		background-color: rgba($color-warning, 0.2);
+	}
+
+	&--thumbsUp {
+		background-color: rgba($color-success, 0.2);
+	}
+
+	&--question {
+		background-color: rgba($color-info, 0.2);
+	}
+
+	&--confused {
+		background-color: rgba($color-danger, 0.2);
+	}
+
+	&__icon {
+		line-height: 1;
+	}
+
+	&__label {
+		color: $text-light;
+		font-weight: $font-weight-medium;
+	}
 }

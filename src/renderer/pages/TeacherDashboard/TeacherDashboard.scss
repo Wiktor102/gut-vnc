@@ -1,253 +1,253 @@
-@use '../../styles/variables' as *;
-@use '../../styles/mixins' as *;
+@use "../../styles/variables" as *;
+@use "../../styles/mixins" as *;
 
 .teacher-dashboard {
-  @include flex-column;
-  height: 100vh;
-  background-color: $bg-dark;
-  
-  &--streaming {
-    overflow: hidden;
-  }
-  
-  // Setup screens
-  &__setup {
-    @include flex-column-center;
-    flex: 1;
-    padding: $spacing-lg;
-    position: relative;
-  }
-  
-  &__back {
-    @include button-ghost;
-    position: absolute;
-    top: $spacing-lg;
-    left: $spacing-lg;
-    gap: $spacing-xs;
-    
-    svg {
-      width: 20px;
-      height: 20px;
-    }
-  }
-  
-  &__setup-card {
-    @include card;
-    width: 100%;
-    max-width: 450px;
-    animation: slideUp 0.4s ease;
-  }
-  
-  &__title {
-    font-size: $font-size-2xl;
-    font-weight: $font-weight-bold;
-    color: $text-light;
-    margin-bottom: $spacing-xl;
-    text-align: center;
-  }
-  
-  &__form {
-    @include flex-column;
-    gap: $spacing-md;
-  }
-  
-  &__field {
-    @include flex-column;
-    gap: $spacing-xs;
-    
-    label {
-      font-size: $font-size-sm;
-      font-weight: $font-weight-medium;
-      color: $text-light-secondary;
-    }
-    
-    input {
-      @include input-base;
-    }
-  }
-  
-  &__info {
-    @include flex-between;
-    padding: $spacing-sm $spacing-md;
-    background-color: $bg-dark-tertiary;
-    border-radius: $radius-md;
-    font-size: $font-size-sm;
-  }
-  
-  &__info-label {
-    color: $text-light-muted;
-  }
-  
-  &__info-value {
-    color: $text-light;
-    font-family: $font-family-mono;
-  }
-  
-  &__error {
-    padding: $spacing-sm $spacing-md;
-    background-color: rgba($color-danger, 0.15);
-    border: 1px solid $color-danger;
-    border-radius: $radius-md;
-    color: $color-danger;
-    font-size: $font-size-sm;
-  }
-  
-  &__submit {
-    @include button-primary;
-    width: 100%;
-    padding: $spacing-md;
-    margin-top: $spacing-sm;
-  }
-  
-  // Streaming layout
-  &__header {
-    @include flex-between;
-    padding: $spacing-md $spacing-lg;
-    background-color: $bg-dark-secondary;
-    border-bottom: 1px solid $bg-dark-tertiary;
-    flex-shrink: 0;
-  }
-  
-  &__header-left {
-    @include flex-center;
-    gap: $spacing-lg;
-  }
-  
-  &__header-right {
-    @include flex-center;
-    gap: $spacing-md;
-  }
-  
-  &__room-name {
-    font-size: $font-size-lg;
-    font-weight: $font-weight-semibold;
-    color: $text-light;
-  }
-  
-  &__stop-btn {
-    @include button-danger;
-  }
-  
-  &__main {
-    display: flex;
-    flex: 1;
-    overflow: hidden;
-  }
-  
-  &__preview {
-    @include flex-column;
-    flex: 1;
-    background-color: $bg-dark;
-  }
-  
-  &__preview-header {
-    @include flex-between;
-    padding: $spacing-sm $spacing-md;
-    background-color: $bg-dark-secondary;
-    border-bottom: 1px solid $bg-dark-tertiary;
-    font-size: $font-size-sm;
-    color: $text-light-muted;
-  }
-  
-  &__mode {
-    padding: $spacing-xs $spacing-sm;
-    border-radius: $radius-sm;
-    font-size: $font-size-xs;
-    font-weight: $font-weight-medium;
-    text-transform: uppercase;
-    
-    &--live {
-      background-color: rgba($color-success, 0.2);
-      color: $color-success;
-    }
-    
-    &--paused {
-      background-color: rgba($color-warning, 0.2);
-      color: $color-warning;
-    }
-    
-    &--blank {
-      background-color: rgba($color-secondary, 0.2);
-      color: $text-light-muted;
-    }
-  }
-  
-  &__preview-content {
-    @include flex-center;
-    flex: 1;
-    background-color: $bg-dark;
-  }
-  
-  &__preview-placeholder {
-    text-align: center;
-    color: $text-light-muted;
-    
-    p {
-      margin-bottom: $spacing-sm;
-    }
-  }
-  
-  &__student-count {
-    font-size: $font-size-2xl;
-    font-weight: $font-weight-bold;
-    color: $color-primary;
-  }
-  
-  &__blank-message {
-    font-size: $font-size-3xl;
-    font-weight: $font-weight-bold;
-    color: $text-light-muted;
-  }
-  
-  &__sidebar {
-    @include flex-column;
-    width: 320px;
-    background-color: $bg-dark-secondary;
-    border-left: 1px solid $bg-dark-tertiary;
-    overflow-y: auto;
-    @include custom-scrollbar;
-  }
-  
-  &__students-section,
-  &__reactions-section {
-    @include flex-column;
-    padding: $spacing-md;
-    border-bottom: 1px solid $bg-dark-tertiary;
-  }
-  
-  &__section-header {
-    @include flex-between;
-    margin-bottom: $spacing-md;
-    
-    h2 {
-      font-size: $font-size-sm;
-      font-weight: $font-weight-semibold;
-      color: $text-light;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-  }
-  
-  &__count {
-    @include flex-center;
-    min-width: 24px;
-    height: 24px;
-    padding: 0 $spacing-xs;
-    background-color: $color-primary;
-    border-radius: $radius-full;
-    font-size: $font-size-xs;
-    font-weight: $font-weight-bold;
-    color: $text-light;
-  }
-  
-  &__clear-btn {
-    @include button-ghost;
-    padding: $spacing-xs $spacing-sm;
-    font-size: $font-size-xs;
-    color: $text-light-muted;
-    
-    &:hover {
-      color: $text-light;
-    }
-  }
+	@include flex-column;
+	height: 100vh;
+	background-color: $bg-dark;
+
+	&--streaming {
+		overflow: hidden;
+	}
+
+	// Setup screens
+	&__setup {
+		@include flex-column-center;
+		flex: 1;
+		padding: $spacing-lg;
+		position: relative;
+	}
+
+	&__back {
+		@include button-ghost;
+		position: absolute;
+		top: $spacing-lg;
+		left: $spacing-lg;
+		gap: $spacing-xs;
+
+		svg {
+			width: 20px;
+			height: 20px;
+		}
+	}
+
+	&__setup-card {
+		@include card;
+		width: 100%;
+		max-width: 450px;
+		animation: slideUp 0.4s ease;
+	}
+
+	&__title {
+		font-size: $font-size-2xl;
+		font-weight: $font-weight-bold;
+		color: $text-light;
+		margin-bottom: $spacing-xl;
+		text-align: center;
+	}
+
+	&__form {
+		@include flex-column;
+		gap: $spacing-md;
+	}
+
+	&__field {
+		@include flex-column;
+		gap: $spacing-xs;
+
+		label {
+			font-size: $font-size-sm;
+			font-weight: $font-weight-medium;
+			color: $text-light-secondary;
+		}
+
+		input {
+			@include input-base;
+		}
+	}
+
+	&__info {
+		@include flex-between;
+		padding: $spacing-sm $spacing-md;
+		background-color: $bg-dark-tertiary;
+		border-radius: $radius-md;
+		font-size: $font-size-sm;
+	}
+
+	&__info-label {
+		color: $text-light-muted;
+	}
+
+	&__info-value {
+		color: $text-light;
+		font-family: $font-family-mono;
+	}
+
+	&__error {
+		padding: $spacing-sm $spacing-md;
+		background-color: rgba($color-danger, 0.15);
+		border: 1px solid $color-danger;
+		border-radius: $radius-md;
+		color: $color-danger;
+		font-size: $font-size-sm;
+	}
+
+	&__submit {
+		@include button-primary;
+		width: 100%;
+		padding: $spacing-md;
+		margin-top: $spacing-sm;
+	}
+
+	// Streaming layout
+	&__header {
+		@include flex-between;
+		padding: $spacing-md $spacing-lg;
+		background-color: $bg-dark-secondary;
+		border-bottom: 1px solid $bg-dark-tertiary;
+		flex-shrink: 0;
+	}
+
+	&__header-left {
+		@include flex-center;
+		gap: $spacing-lg;
+	}
+
+	&__header-right {
+		@include flex-center;
+		gap: $spacing-md;
+	}
+
+	&__room-name {
+		font-size: $font-size-lg;
+		font-weight: $font-weight-semibold;
+		color: $text-light;
+	}
+
+	&__stop-btn {
+		@include button-danger;
+	}
+
+	&__main {
+		display: flex;
+		flex: 1;
+		overflow: hidden;
+	}
+
+	&__preview {
+		@include flex-column;
+		flex: 1;
+		background-color: $bg-dark;
+	}
+
+	&__preview-header {
+		@include flex-between;
+		padding: $spacing-sm $spacing-md;
+		background-color: $bg-dark-secondary;
+		border-bottom: 1px solid $bg-dark-tertiary;
+		font-size: $font-size-sm;
+		color: $text-light-muted;
+	}
+
+	&__mode {
+		padding: $spacing-xs $spacing-sm;
+		border-radius: $radius-sm;
+		font-size: $font-size-xs;
+		font-weight: $font-weight-medium;
+		text-transform: uppercase;
+
+		&--live {
+			background-color: rgba($color-success, 0.2);
+			color: $color-success;
+		}
+
+		&--paused {
+			background-color: rgba($color-warning, 0.2);
+			color: $color-warning;
+		}
+
+		&--blank {
+			background-color: rgba($color-secondary, 0.2);
+			color: $text-light-muted;
+		}
+	}
+
+	&__preview-content {
+		@include flex-center;
+		flex: 1;
+		background-color: $bg-dark;
+	}
+
+	&__preview-placeholder {
+		text-align: center;
+		color: $text-light-muted;
+
+		p {
+			margin-bottom: $spacing-sm;
+		}
+	}
+
+	&__student-count {
+		font-size: $font-size-2xl;
+		font-weight: $font-weight-bold;
+		color: $color-primary;
+	}
+
+	&__blank-message {
+		font-size: $font-size-3xl;
+		font-weight: $font-weight-bold;
+		color: $text-light-muted;
+	}
+
+	&__sidebar {
+		@include flex-column;
+		width: 320px;
+		background-color: $bg-dark-secondary;
+		border-left: 1px solid $bg-dark-tertiary;
+		overflow-y: auto;
+		@include custom-scrollbar;
+	}
+
+	&__students-section,
+	&__reactions-section {
+		@include flex-column;
+		padding: $spacing-md;
+		border-bottom: 1px solid $bg-dark-tertiary;
+	}
+
+	&__section-header {
+		@include flex-between;
+		margin-bottom: $spacing-md;
+
+		h2 {
+			font-size: $font-size-sm;
+			font-weight: $font-weight-semibold;
+			color: $text-light;
+			text-transform: uppercase;
+			letter-spacing: 0.5px;
+		}
+	}
+
+	&__count {
+		@include flex-center;
+		min-width: 24px;
+		height: 24px;
+		padding: 0 $spacing-xs;
+		background-color: $color-primary;
+		border-radius: $radius-full;
+		font-size: $font-size-xs;
+		font-weight: $font-weight-bold;
+		color: $text-light;
+	}
+
+	&__clear-btn {
+		@include button-ghost;
+		padding: $spacing-xs $spacing-sm;
+		font-size: $font-size-xs;
+		color: $text-light-muted;
+
+		&:hover {
+			color: $text-light;
+		}
+	}
 }

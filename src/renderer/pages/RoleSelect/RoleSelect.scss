@@ -1,146 +1,146 @@
-@use '../../styles/variables' as *;
-@use '../../styles/mixins' as *;
+@use "../../styles/variables" as *;
+@use "../../styles/mixins" as *;
 
 .role-select {
-  @include flex-center;
-  min-height: 100vh;
-  padding: $spacing-lg;
-  background: linear-gradient(135deg, $bg-dark 0%, $bg-dark-secondary 100%);
-  
-  &__container {
-    @include flex-column;
-    align-items: center;
-    width: 100%;
-    max-width: 500px;
-    animation: slideUp 0.5s ease;
-  }
-  
-  &__header {
-    text-align: center;
-    margin-bottom: $spacing-2xl;
-  }
-  
-  &__title {
-    font-size: $font-size-4xl;
-    font-weight: $font-weight-bold;
-    color: $text-light;
-    margin-bottom: $spacing-sm;
-    letter-spacing: -0.5px;
-  }
-  
-  &__subtitle {
-    font-size: $font-size-lg;
-    color: $text-light-muted;
-  }
-  
-  &__options {
-    @include flex-column;
-    width: 100%;
-    gap: $spacing-md;
-  }
-  
-  &__option {
-    @include flex-between;
-    width: 100%;
-    padding: $spacing-lg;
-    background-color: $bg-dark-secondary;
-    border: 2px solid transparent;
-    border-radius: $radius-lg;
-    cursor: pointer;
-    transition: all $transition-normal;
-    text-align: left;
-    
-    &:hover {
-      background-color: $bg-dark-tertiary;
-      transform: translateX(4px);
-    }
-    
-    &:focus {
-      outline: none;
-      border-color: $color-primary;
-      box-shadow: 0 0 0 3px rgba($color-primary, 0.2);
-    }
-    
-    &--teacher {
-      &:hover {
-        border-color: $color-primary;
-      }
-      
-      .role-select__option-icon {
-        background-color: rgba($color-primary, 0.15);
-        color: $color-primary-light;
-      }
-    }
-    
-    &--student {
-      &:hover {
-        border-color: $color-success;
-      }
-      
-      .role-select__option-icon {
-        background-color: rgba($color-success, 0.15);
-        color: $color-success;
-      }
-    }
-  }
-  
-  &__option-icon {
-    @include flex-center;
-    width: 56px;
-    height: 56px;
-    border-radius: $radius-md;
-    flex-shrink: 0;
-    
-    svg {
-      width: 28px;
-      height: 28px;
-    }
-  }
-  
-  &__option-content {
-    flex: 1;
-    margin-left: $spacing-md;
-    margin-right: $spacing-md;
-  }
-  
-  &__option-title {
-    font-size: $font-size-xl;
-    font-weight: $font-weight-semibold;
-    color: $text-light;
-    margin-bottom: $spacing-xs;
-  }
-  
-  &__option-desc {
-    font-size: $font-size-sm;
-    color: $text-light-muted;
-    line-height: 1.4;
-  }
-  
-  &__option-arrow {
-    @include flex-center;
-    width: 32px;
-    height: 32px;
-    color: $text-light-muted;
-    transition: transform $transition-fast;
-    
-    svg {
-      width: 20px;
-      height: 20px;
-    }
-    
-    .role-select__option:hover & {
-      transform: translateX(4px);
-      color: $text-light;
-    }
-  }
-  
-  &__footer {
-    margin-top: $spacing-2xl;
-    text-align: center;
-  }
-  
-  &__version {
-    font-size: $font-size-sm;
-    color: $text-light-muted;
-  }
+	@include flex-center;
+	min-height: 100vh;
+	padding: $spacing-lg;
+	background: linear-gradient(135deg, $bg-dark 0%, $bg-dark-secondary 100%);
+
+	&__container {
+		@include flex-column;
+		align-items: center;
+		width: 100%;
+		max-width: 500px;
+		animation: slideUp 0.5s ease;
+	}
+
+	&__header {
+		text-align: center;
+		margin-bottom: $spacing-2xl;
+	}
+
+	&__title {
+		font-size: $font-size-4xl;
+		font-weight: $font-weight-bold;
+		color: $text-light;
+		margin-bottom: $spacing-sm;
+		letter-spacing: -0.5px;
+	}
+
+	&__subtitle {
+		font-size: $font-size-lg;
+		color: $text-light-muted;
+	}
+
+	&__options {
+		@include flex-column;
+		width: 100%;
+		gap: $spacing-md;
+	}
+
+	&__option {
+		@include flex-between;
+		width: 100%;
+		padding: $spacing-lg;
+		background-color: $bg-dark-secondary;
+		border: 2px solid transparent;
+		border-radius: $radius-lg;
+		cursor: pointer;
+		transition: all $transition-normal;
+		text-align: left;
+
+		&:hover {
+			background-color: $bg-dark-tertiary;
+			transform: translateX(4px);
+		}
+
+		&:focus {
+			outline: none;
+			border-color: $color-primary;
+			box-shadow: 0 0 0 3px rgba($color-primary, 0.2);
+		}
+
+		&--teacher {
+			&:hover {
+				border-color: $color-primary;
+			}
+
+			.role-select__option-icon {
+				background-color: rgba($color-primary, 0.15);
+				color: $color-primary-light;
+			}
+		}
+
+		&--student {
+			&:hover {
+				border-color: $color-success;
+			}
+
+			.role-select__option-icon {
+				background-color: rgba($color-success, 0.15);
+				color: $color-success;
+			}
+		}
+	}
+
+	&__option-icon {
+		@include flex-center;
+		width: 56px;
+		height: 56px;
+		border-radius: $radius-md;
+		flex-shrink: 0;
+
+		svg {
+			width: 28px;
+			height: 28px;
+		}
+	}
+
+	&__option-content {
+		flex: 1;
+		margin-left: $spacing-md;
+		margin-right: $spacing-md;
+	}
+
+	&__option-title {
+		font-size: $font-size-xl;
+		font-weight: $font-weight-semibold;
+		color: $text-light;
+		margin-bottom: $spacing-xs;
+	}
+
+	&__option-desc {
+		font-size: $font-size-sm;
+		color: $text-light-muted;
+		line-height: 1.4;
+	}
+
+	&__option-arrow {
+		@include flex-center;
+		width: 32px;
+		height: 32px;
+		color: $text-light-muted;
+		transition: transform $transition-fast;
+
+		svg {
+			width: 20px;
+			height: 20px;
+		}
+
+		.role-select__option:hover & {
+			transform: translateX(4px);
+			color: $text-light;
+		}
+	}
+
+	&__footer {
+		margin-top: $spacing-2xl;
+		text-align: center;
+	}
+
+	&__version {
+		font-size: $font-size-sm;
+		color: $text-light-muted;
+	}
 }
