@@ -2,7 +2,7 @@ import { useState, useCallback, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useConnection } from "../../context/ConnectionContext";
 import { useReactions } from "../../context/ReactionsContext";
-import { PL, DEFAULT_PORT } from "@shared/constants";
+import { PL } from "@shared/constants";
 import { ReactionType, ScreenMode } from "@shared/types";
 import ReactionBar from "../../components/ReactionBar/ReactionBar";
 import ReactionDisplay from "../../components/ReactionDisplay/ReactionDisplay";
@@ -20,10 +20,10 @@ type ViewerStep = "name" | "discover" | "viewing";
 
 function StudentViewer() {
 	const navigate = useNavigate();
-	const { isConnected, setConnected, setConnecting, setError, error, reset } = useConnection();
+	const { setConnected, setConnecting, setError, error, reset } = useConnection();
 	const { myReaction, setMyReaction, setReaction, clearAllReactions } = useReactions();
 
-	const [step, setStep] = useState<ViewerStep>("name");
+	const [step, setStep] = useState<ViewerStep | "connecting">("name");
 	const [studentName, setStudentName] = useState("");
 	const [teachers, setTeachers] = useState<TeacherInfo[]>([]);
 	const [selectedTeacher, setSelectedTeacher] = useState<TeacherInfo | null>(null);
@@ -34,36 +34,78 @@ function StudentViewer() {
 	const wsRef = useRef<WebSocket | null>(null);
 	const videoRef = useRef<HTMLVideoElement>(null);
 	const peerConnectionRef = useRef<RTCPeerConnection | null>(null);
+	const connectTimeoutRef = useRef<number | null>(null);
+	const stepRef = useRef(step);
+	const studentIdRef = useRef<string | null>(null);
+	const intentionalDisconnectRef = useRef(false);
+	const handleMessageRef = useRef<(message: Record<string, unknown>) => void>(() => undefined);
+
+	useEffect(() => {
+		stepRef.current = step;
+	}, [step]);
+
+	const getStudentId = useCallback((): string => {
+		if (!studentIdRef.current) {
+			studentIdRef.current =
+				typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
+					? crypto.randomUUID()
+					: `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+		}
+		return studentIdRef.current;
+	}, []);
+
+	const clearConnectTimeout = useCallback(() => {
+		if (connectTimeoutRef.current) {
+			window.clearTimeout(connectTimeoutRef.current);
+			connectTimeoutRef.current = null;
+		}
+	}, []);
+
+	const cleanupTransport = useCallback(() => {
+		clearConnectTimeout();
+
+		const ws = wsRef.current;
+		wsRef.current = null;
+		if (ws) {
+			ws.onopen = null;
+			ws.onmessage = null;
+			ws.onclose = null;
+			ws.onerror = null;
+			try {
+				if (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING) {
+					ws.close();
+				}
+			} catch {
+				// ignore
+			}
+		}
+
+		if (peerConnectionRef.current) {
+			try {
+				peerConnectionRef.current.ontrack = null;
+				peerConnectionRef.current.onicecandidate = null;
+				peerConnectionRef.current.close();
+			} catch {
+				// ignore
+			}
+			peerConnectionRef.current = null;
+		}
+	}, [clearConnectTimeout]);
+
+	const disconnect = useCallback(() => {
+		intentionalDisconnectRef.current = true;
+		cleanupTransport();
+		setConnected(false);
+		clearAllReactions();
+		setMyReaction(null);
+	}, [cleanupTransport, setConnected, clearAllReactions, setMyReaction]);
 
 	// Cleanup on unmount
 	useEffect(() => {
 		return () => {
 			disconnect();
 		};
-	}, []);
-
-	const disconnect = useCallback(() => {
-		if (wsRef.current) {
-			wsRef.current.close();
-			wsRef.current = null;
-		}
-		if (peerConnectionRef.current) {
-			peerConnectionRef.current.close();
-			peerConnectionRef.current = null;
-		}
-		setConnected(false);
-		clearAllReactions();
-		setMyReaction(null);
-	}, [setConnected, clearAllReactions, setMyReaction]);
-
-	const handleNameSubmit = useCallback(() => {
-		if (!studentName.trim()) {
-			setError("Wpisz swoje imie");
-			return;
-		}
-		setStep("discover");
-		handleDiscover();
-	}, [studentName, setError]);
+	}, [disconnect]);
 
 	const handleDiscover = useCallback(async () => {
 		setIsSearching(true);
@@ -75,7 +117,9 @@ function StudentViewer() {
 				setTeachers(result.teachers);
 				if (result.teachers.length === 0) {
 					// Keep searching
-					setTimeout(handleDiscover, 3000);
+					window.setTimeout(() => {
+						void handleDiscover();
+					}, 3000);
 				}
 			} else {
 				setError(result.error || "Blad podczas wyszukiwania");
@@ -87,23 +131,48 @@ function StudentViewer() {
 		}
 	}, [setError]);
 
+	const handleNameSubmit = useCallback(() => {
+		if (!studentName.trim()) {
+			setError("Wpisz swoje imie");
+			return;
+		}
+		setStep("discover");
+		handleDiscover();
+	}, [studentName, setError, handleDiscover]);
+
 	const handleConnect = useCallback(
 		async (teacher: TeacherInfo) => {
 			setSelectedTeacher(teacher);
+			setStep("connecting");
 			setConnecting(true);
 			setError(null);
+			intentionalDisconnectRef.current = false;
+			cleanupTransport();
 
 			try {
+				const host = teacher.address.includes(":") && !teacher.address.startsWith("[") ? `[${teacher.address}]` : teacher.address;
+
 				// Connect via WebSocket
-				const ws = new WebSocket(`ws://${teacher.address}:${teacher.port}`);
+				const ws = new WebSocket(`ws://${host}:${teacher.port}`);
 				wsRef.current = ws;
+
+				// If the socket opens but we never get a welcome, show an error.
+				connectTimeoutRef.current = window.setTimeout(() => {
+					if (stepRef.current === "connecting") {
+						setError("Brak odpowiedzi od nauczyciela");
+						setStep("discover");
+						cleanupTransport();
+						setConnected(false);
+					}
+				}, 8000);
 
 				ws.onopen = () => {
 					// Send join message
+					const studentId = getStudentId();
 					ws.send(
 						JSON.stringify({
 							type: "join",
-							studentId: crypto.randomUUID(),
+							studentId,
 							studentName: studentName.trim(),
 							timestamp: Date.now()
 						})
@@ -113,7 +182,7 @@ function StudentViewer() {
 				ws.onmessage = event => {
 					try {
 						const message = JSON.parse(event.data);
-						handleMessage(message);
+						handleMessageRef.current(message);
 					} catch (err) {
 						console.error("Failed to parse message:", err);
 					}
@@ -121,75 +190,38 @@ function StudentViewer() {
 
 				ws.onclose = () => {
 					setConnected(false);
-					if (step === "viewing") {
-						setError("Polaczenie zostalo zamkniete");
+					clearConnectTimeout();
+					if (!intentionalDisconnectRef.current) {
+						if (stepRef.current === "connecting") {
+							setError("Nie udalo sie polaczyc");
+						}
+						if (stepRef.current === "viewing") {
+							setError("Polaczenie zostalo zamkniete");
+						}
+						if (stepRef.current !== "name") {
+							setStep("discover");
+						}
 					}
 				};
 
 				ws.onerror = () => {
 					setError("Blad polaczenia");
 					setConnected(false);
+					clearConnectTimeout();
+					setStep("discover");
+					cleanupTransport();
 				};
 			} catch (err) {
 				setError("Nie udalo sie polaczyc");
 				setConnected(false);
+				clearConnectTimeout();
+				setStep("discover");
 			}
 		},
-		[studentName, setConnecting, setConnected, setError, step]
+		[cleanupTransport, clearConnectTimeout, getStudentId, studentName, setConnecting, setConnected, setError]
 	);
 
-	const handleMessage = useCallback(
-		(message: Record<string, unknown>) => {
-			switch (message.type) {
-				case "welcome":
-					setConnected(true);
-					setStep("viewing");
-					break;
-
-				case "reaction-update":
-					setReaction(message.studentId as string, message.studentId as string, message.reaction as ReactionType);
-					break;
-
-				case "all-reactions": {
-					// Handle all reactions
-					const reactions = message.reactions as Record<string, { name: string; reaction: ReactionType }>;
-					Object.entries(reactions).forEach(([id, data]) => {
-						setReaction(id, data.name, data.reaction);
-					});
-					break;
-				}
-
-				case "clear-reactions":
-					clearAllReactions();
-					setMyReaction(null);
-					break;
-
-				case "screen-mode":
-					setScreenMode(message.mode as ScreenMode);
-					if (message.message) {
-						setBlankMessage(message.message as string);
-					}
-					break;
-
-				case "kicked":
-					disconnect();
-					setError((message.reason as string) || PL.kicked);
-					setStep("discover");
-					break;
-
-				case "offer":
-					handleOffer(message);
-					break;
-
-				case "ice-candidate":
-					handleIceCandidate(message);
-					break;
-			}
-		},
-		[setConnected, setReaction, clearAllReactions, setMyReaction, setError, disconnect]
-	);
-
-	const handleOffer = useCallback(async (message: Record<string, unknown>) => {
+	async function handleOffer(message: Record<string, unknown>) {
 		try {
 			const pc = new RTCPeerConnection({
 				iceServers: []
@@ -230,9 +262,9 @@ function StudentViewer() {
 		} catch (err) {
 			console.error("Failed to handle offer:", err);
 		}
-	}, []);
+	}
 
-	const handleIceCandidate = useCallback(async (message: Record<string, unknown>) => {
+	async function handleIceCandidate(message: Record<string, unknown>) {
 		try {
 			if (peerConnectionRef.current && message.candidate) {
 				await peerConnectionRef.current.addIceCandidate(new RTCIceCandidate(message.candidate as RTCIceCandidateInit));
@@ -240,7 +272,63 @@ function StudentViewer() {
 		} catch (err) {
 			console.error("Failed to add ICE candidate:", err);
 		}
-	}, []);
+	}
+
+	const handleMessage = useCallback(
+		(message: Record<string, unknown>) => {
+			switch (message.type) {
+				case "welcome":
+					clearConnectTimeout();
+					setConnected(true);
+					setStep("viewing");
+					break;
+
+				case "reaction-update":
+					setReaction(message.studentId as string, message.studentId as string, message.reaction as ReactionType);
+					break;
+
+				case "all-reactions": {
+					// Handle all reactions
+					const reactions = message.reactions as Record<string, { name: string; reaction: ReactionType }>;
+					Object.entries(reactions).forEach(([id, data]) => {
+						setReaction(id, data.name, data.reaction);
+					});
+					break;
+				}
+
+				case "clear-reactions":
+					clearAllReactions();
+					setMyReaction(null);
+					break;
+
+				case "screen-mode":
+					setScreenMode(message.mode as ScreenMode);
+					if (message.message) {
+						setBlankMessage(message.message as string);
+					}
+					break;
+
+				case "kicked":
+					disconnect();
+					setError((message.reason as string) || PL.kicked);
+					setStep("discover");
+					break;
+
+				case "offer":
+					void handleOffer(message);
+					break;
+
+				case "ice-candidate":
+					void handleIceCandidate(message);
+					break;
+			}
+		},
+		[clearConnectTimeout, setConnected, setReaction, clearAllReactions, setMyReaction, setError, disconnect]
+	);
+
+	useEffect(() => {
+		handleMessageRef.current = handleMessage;
+	}, [handleMessage]);
 
 	const handleReaction = useCallback(
 		(reaction: ReactionType) => {
@@ -248,17 +336,18 @@ function StudentViewer() {
 			setMyReaction(newReaction);
 
 			if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+				const studentId = getStudentId();
 				wsRef.current.send(
 					JSON.stringify({
 						type: "reaction",
-						studentId: crypto.randomUUID(), // Should use stored ID
+						studentId,
 						reaction: newReaction,
 						timestamp: Date.now()
 					})
 				);
 			}
 		},
-		[myReaction, setMyReaction]
+		[getStudentId, myReaction, setMyReaction]
 	);
 
 	const handleDisconnect = useCallback(() => {
@@ -378,6 +467,41 @@ function StudentViewer() {
 							</svg>
 							{PL.refreshList}
 						</button>
+					</div>
+				</div>
+			</div>
+		);
+	}
+
+	// Connecting step
+	if (step === "connecting") {
+		return (
+			<div className="student-viewer">
+				<div className="student-viewer__setup">
+					<button
+						className="student-viewer__back"
+						onClick={() => {
+							intentionalDisconnectRef.current = true;
+							cleanupTransport();
+							setConnected(false);
+							setStep("discover");
+						}}
+					>
+						<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+							<path d="M19 12H5M12 19l-7-7 7-7" />
+						</svg>
+						Wstecz
+					</button>
+
+					<div className="student-viewer__setup-card">
+						<h1 className="student-viewer__title">{PL.connecting}</h1>
+
+						<div className="student-viewer__searching">
+							<div className="student-viewer__spinner" />
+							<p>{selectedTeacher ? `${selectedTeacher.name} - ${selectedTeacher.roomName}` : PL.searchingTeacher}</p>
+						</div>
+
+						{error && <div className="student-viewer__error">{error}</div>}
 					</div>
 				</div>
 			</div>
