@@ -64,6 +64,17 @@
 		input {
 			@include input-base;
 		}
+
+		select {
+			@include input-base;
+			cursor: pointer;
+		}
+	}
+
+	&__help-text {
+		font-size: $font-size-xs;
+		color: $text-light-muted;
+		margin-top: $spacing-xs;
 	}
 
 	&__info {

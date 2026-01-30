@@ -3,6 +3,47 @@ import { EventEmitter } from "events";
 import { isIP } from "net";
 import { MDNS_SERVICE_TYPE, DEFAULT_PORT } from "@shared/constants";
 
+function isLoopbackV4(address: string): boolean {
+	return address.startsWith("127.");
+}
+
+function isLinkLocalV4(address: string): boolean {
+	return address.startsWith("169.254.");
+}
+
+function isPrivateV4(address: string): boolean {
+	if (address.startsWith("10.")) return true;
+	if (address.startsWith("192.168.")) return true;
+	if (address.startsWith("172.")) {
+		const second = Number(address.split(".")[1]);
+		return second >= 16 && second <= 31;
+	}
+	return false;
+}
+
+function scoreIpAddress(address: string): number {
+	const ipVersion = isIP(address);
+	if (ipVersion === 4) {
+		if (isLoopbackV4(address)) return -1000;
+		if (isLinkLocalV4(address)) return -500;
+		if (address.startsWith("192.168.")) return 300;
+		if (address.startsWith("10.")) return 200;
+		if (isPrivateV4(address)) return 190;
+		return 100;
+	}
+
+	if (ipVersion === 6) {
+		const lower = address.toLowerCase();
+		if (lower === "::1") return -1000;
+		if (lower.startsWith("fe80:")) return -500;
+		// Prefer global over ULA (fc00::/7) a little bit.
+		if (lower.startsWith("fc") || lower.startsWith("fd")) return 80;
+		return 120;
+	}
+
+	return -2000;
+}
+
 export interface DiscoveredTeacher {
 	name: string;
 	roomName: string;
@@ -24,13 +65,14 @@ export class DiscoveryService extends EventEmitter {
 	/**
 	 * Advertise as a teacher on the network
 	 */
-	async advertise(roomName: string, teacherName: string, port: number = DEFAULT_PORT): Promise<void> {
+	async advertise(roomName: string, teacherName: string, port: number = DEFAULT_PORT, host?: string): Promise<void> {
 		return new Promise((resolve, reject) => {
 			try {
 				this.publishedService = this.bonjour.publish({
 					name: `${roomName}-${Date.now()}`,
 					type: MDNS_SERVICE_TYPE,
 					port: port,
+					host: host, // Specify which interface to advertise on
 					txt: {
 						room: roomName,
 						teacher: teacherName,
@@ -142,18 +184,22 @@ export class DiscoveryService extends EventEmitter {
 	}
 
 	private pickBestAddress(service: Service): string {
-		const addresses = (service.addresses || []).filter(Boolean);
+		const candidates: string[] = [];
 
-		// Prefer IPv4; browsers/WebSocket URLs handle it without extra syntax.
-		const ipv4 = addresses.find(a => isIP(a) === 4);
-		if (ipv4) return ipv4;
+		// `referer.address` is often the most accurate “where the response came from”.
+		const refererAddress = (service as unknown as { referer?: { address?: string } })?.referer?.address;
+		if (refererAddress) candidates.push(refererAddress);
 
-		// Then prefer non-link-local IPv6 if present.
-		const ipv6Global = addresses.find(a => isIP(a) === 6 && !a.toLowerCase().startsWith("fe80:"));
-		if (ipv6Global) return ipv6Global;
+		candidates.push(...((service.addresses || []).filter(Boolean) as string[]));
 
-		const anyIp = addresses.find(a => isIP(a) !== 0);
-		if (anyIp) return anyIp;
+		const ranked = candidates
+			.filter(a => isIP(a) !== 0)
+			.map(a => ({ address: a, score: scoreIpAddress(a) }))
+			.sort((a, b) => b.score - a.score);
+
+		if (ranked.length > 0 && ranked[0].score > -1000) {
+			return ranked[0].address;
+		}
 
 		return service.host || "localhost";
 	}

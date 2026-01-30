@@ -43,13 +43,14 @@ export interface ElectronAPI {
 	stopCapture: () => Promise<{ success: boolean }>;
 
 	// Network
-	getLocalIPs: () => Promise<string[]>;
+	getLocalIPs: () => Promise<Array<{ address: string; name: string; internal: boolean }>>;
 
 	// Teacher session
 	startTeacherSession: (config: {
 		teacherName: string;
 		roomName: string;
 		port: number;
+		address?: string;
 	}) => Promise<{ success: boolean; port?: number; error?: string }>;
 	stopTeacherSession: () => Promise<{ success: boolean }>;
 

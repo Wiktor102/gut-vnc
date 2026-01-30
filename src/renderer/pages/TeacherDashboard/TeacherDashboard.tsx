@@ -26,16 +26,36 @@ function TeacherDashboard(props: TeacherDashboardProps) {
 	const [roomName, setRoomName] = useState("");
 	const [selectedSourceId, setSelectedSourceId] = useState<string | null>(null);
 	const [screenMode, setScreenMode] = useState<ScreenMode>("live");
-	const [localIPs, setLocalIPs] = useState<string[]>([]);
+	const [localIPs, setLocalIPs] = useState<Array<{ address: string; name: string; internal: boolean }>>([]);
+	const [selectedIP, setSelectedIP] = useState<string>("");
 
 	// Get local IPs for display
 	useEffect(() => {
-		window.electronAPI.getLocalIPs().then(setLocalIPs);
+		window.electronAPI.getLocalIPs().then(ips => {
+			setLocalIPs(ips);
+
+			const preferred =
+				ips.find(ip => !ip.internal && ip.address.startsWith("192.168.")) ||
+				ips.find(ip => !ip.internal && !ip.address.startsWith("127.")) ||
+				ips.find(ip => !ip.address.startsWith("127.")) ||
+				ips[0];
+
+			// Only auto-set when empty or currently loopback.
+			setSelectedIP(prev => {
+				if (prev && !prev.startsWith("127.")) return prev;
+				return preferred?.address || prev;
+			});
+		});
 	}, []);
 
 	const handleStartSession = useCallback(async () => {
 		if (!teacherName.trim() || !roomName.trim()) {
 			setError("Wypelnij wszystkie pola");
+			return;
+		}
+
+		if (!selectedIP) {
+			setError("Wybierz adres sieciowy");
 			return;
 		}
 
@@ -46,7 +66,8 @@ function TeacherDashboard(props: TeacherDashboardProps) {
 			const result = await window.electronAPI.startTeacherSession({
 				teacherName: teacherName.trim(),
 				roomName: roomName.trim(),
-				port: DEFAULT_PORT
+				port: DEFAULT_PORT,
+				address: selectedIP
 			});
 
 			if (result.success) {
@@ -59,7 +80,7 @@ function TeacherDashboard(props: TeacherDashboardProps) {
 		} finally {
 			setConnecting(false);
 		}
-	}, [teacherName, roomName, setConnecting, setError]);
+	}, [teacherName, roomName, selectedIP, setConnecting, setError]);
 
 	const handleSourceSelected = useCallback(
 		async (sourceId: string) => {
@@ -159,9 +180,23 @@ function TeacherDashboard(props: TeacherDashboardProps) {
 							</div>
 
 							{localIPs.length > 0 && (
-								<div className="teacher-dashboard__info">
-									<span className="teacher-dashboard__info-label">Adres IP:</span>
-									<span className="teacher-dashboard__info-value">{localIPs.join(", ")}</span>
+								<div className="teacher-dashboard__field">
+									<label htmlFor="networkIP">Adres sieciowy</label>
+									<select
+										id="networkIP"
+										value={selectedIP}
+										onChange={e => setSelectedIP(e.target.value)}
+										className="teacher-dashboard__select"
+									>
+										{localIPs.map(ip => (
+											<option key={ip.address} value={ip.address}>
+												{ip.address} ({ip.name}){ip.internal ? " - Loopback" : ""}
+											</option>
+										))}
+									</select>
+									<span className="teacher-dashboard__help-text">
+										Wybierz interfejs sieciowy, ktory bedzie uzywany do polaczen
+									</span>
 								</div>
 							)}
 
@@ -170,7 +205,7 @@ function TeacherDashboard(props: TeacherDashboardProps) {
 							<button
 								className="teacher-dashboard__submit"
 								onClick={handleStartSession}
-								disabled={!teacherName.trim() || !roomName.trim()}
+								disabled={!teacherName.trim() || !roomName.trim() || !selectedIP}
 							>
 								{PL.startSession}
 							</button>

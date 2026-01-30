@@ -4,6 +4,18 @@ import { DiscoveryService } from "../network/discovery";
 import { SignalingServer } from "../network/signaling-server";
 import { ScreenCapture } from "../capture/screen-capture";
 
+function scoreLocalIpv4(address: string, internal: boolean): number {
+	if (internal || address.startsWith("127.")) return -1000;
+	if (address.startsWith("169.254.")) return -500;
+	if (address.startsWith("192.168.")) return 300;
+	if (address.startsWith("10.")) return 200;
+	if (address.startsWith("172.")) {
+		const second = Number(address.split(".")[1]);
+		if (second >= 16 && second <= 31) return 190;
+	}
+	return 100;
+}
+
 let discoveryService: DiscoveryService | null = null;
 let signalingServer: SignalingServer | null = null;
 let screenCapture: ScreenCapture | null = null;
@@ -44,21 +56,27 @@ export function setupIpcHandlers(): void {
 	// Get local network IPs
 	ipcMain.handle("get-local-ips", () => {
 		const interfaces = networkInterfaces();
-		const ips: string[] = [];
+		const ips: Array<{ address: string; name: string; internal: boolean }> = [];
 
 		for (const name of Object.keys(interfaces)) {
 			const netInterface = interfaces[name];
 			if (!netInterface) continue;
 
 			for (const net of netInterface) {
-				// Skip internal and non-IPv4 addresses
-				if (!net.internal && net.family === "IPv4") {
-					ips.push(net.address);
+				// Skip non-IPv4 addresses
+				if (net.family === "IPv4") {
+					ips.push({
+						address: net.address,
+						name,
+						internal: net.internal
+					});
 				}
 			}
 		}
 
-		return ips;
+		return ips
+			.filter(ip => ip.address && ip.address !== "0.0.0.0")
+			.sort((a, b) => scoreLocalIpv4(b.address, b.internal) - scoreLocalIpv4(a.address, a.internal));
 	});
 
 	// Start teacher session (discovery + signaling)
@@ -70,6 +88,7 @@ export function setupIpcHandlers(): void {
 				teacherName: string;
 				roomName: string;
 				port: number;
+				address?: string; // Bind address (optional)
 			}
 		) => {
 			try {
@@ -77,12 +96,12 @@ export function setupIpcHandlers(): void {
 				await stopServices();
 
 				// Start signaling server
-				signalingServer = new SignalingServer(config.port);
+				signalingServer = new SignalingServer(config.port, config.address);
 				await signalingServer.start(config.teacherName, config.roomName);
 
 				// Start discovery service (advertise)
 				discoveryService = new DiscoveryService();
-				await discoveryService.advertise(config.roomName, config.teacherName, config.port);
+				await discoveryService.advertise(config.roomName, config.teacherName, config.port, config.address);
 
 				// Forward events to renderer
 				signalingServer.on("student-joined", student => {

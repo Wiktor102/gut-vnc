@@ -30,10 +30,12 @@ export class SignalingServer extends EventEmitter {
 	private roomName: string = "";
 	private reactionTimers: Map<string, NodeJS.Timeout> = new Map();
 	private port: number;
+	private host?: string;
 
-	constructor(port: number) {
+	constructor(port: number, host?: string) {
 		super();
 		this.port = port;
+		this.host = host;
 	}
 
 	/**
@@ -46,7 +48,10 @@ export class SignalingServer extends EventEmitter {
 				this.teacherName = teacherName;
 				this.roomName = roomName;
 
-				this.wss = new WebSocketServer({ port: this.port });
+				this.wss = new WebSocketServer({
+					port: this.port,
+					host: this.host
+				});
 
 				this.wss.on("listening", () => {
 					console.info(`Signaling server started on port ${this.port}`);
