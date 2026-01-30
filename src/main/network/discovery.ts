@@ -1,5 +1,6 @@
 import Bonjour, { Service, Browser } from "bonjour-service";
 import { EventEmitter } from "events";
+import { isIP } from "net";
 import { MDNS_SERVICE_TYPE, DEFAULT_PORT } from "@shared/constants";
 
 export interface DiscoveredTeacher {
@@ -127,7 +128,7 @@ export class DiscoveryService extends EventEmitter {
 		const teacher: DiscoveredTeacher = {
 			name: txt.teacher || "Unknown",
 			roomName: txt.room || "Unknown Room",
-			address: service.addresses?.[0] || service.host || "localhost",
+			address: this.pickBestAddress(service),
 			port: service.port || DEFAULT_PORT
 		};
 
@@ -138,6 +139,23 @@ export class DiscoveryService extends EventEmitter {
 			this.emit("teacher-found", teacher);
 			console.info(`Discovered teacher: ${teacher.name} at ${teacher.address}:${teacher.port}`);
 		}
+	}
+
+	private pickBestAddress(service: Service): string {
+		const addresses = (service.addresses || []).filter(Boolean);
+
+		// Prefer IPv4; browsers/WebSocket URLs handle it without extra syntax.
+		const ipv4 = addresses.find(a => isIP(a) === 4);
+		if (ipv4) return ipv4;
+
+		// Then prefer non-link-local IPv6 if present.
+		const ipv6Global = addresses.find(a => isIP(a) === 6 && !a.toLowerCase().startsWith("fe80:"));
+		if (ipv6Global) return ipv6Global;
+
+		const anyIp = addresses.find(a => isIP(a) !== 0);
+		if (anyIp) return anyIp;
+
+		return service.host || "localhost";
 	}
 
 	/**

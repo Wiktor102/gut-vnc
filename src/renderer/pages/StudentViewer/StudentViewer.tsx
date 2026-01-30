@@ -32,8 +32,10 @@ function StudentViewer() {
 	const [blankMessage, setBlankMessage] = useState("");
 
 	const wsRef = useRef<WebSocket | null>(null);
+	const studentIdRef = useRef<string>(crypto.randomUUID());
 	const videoRef = useRef<HTMLVideoElement>(null);
 	const peerConnectionRef = useRef<RTCPeerConnection | null>(null);
+	const connectTimeoutRef = useRef<number | null>(null);
 
 	// Cleanup on unmount
 	useEffect(() => {
@@ -43,6 +45,10 @@ function StudentViewer() {
 	}, []);
 
 	const disconnect = useCallback(() => {
+		if (connectTimeoutRef.current) {
+			window.clearTimeout(connectTimeoutRef.current);
+			connectTimeoutRef.current = null;
+		}
 		if (wsRef.current) {
 			wsRef.current.close();
 			wsRef.current = null;
@@ -95,15 +101,34 @@ function StudentViewer() {
 
 			try {
 				// Connect via WebSocket
-				const ws = new WebSocket(`ws://${teacher.address}:${teacher.port}`);
+				const address = teacher.address.includes(":") ? `[${teacher.address}]` : teacher.address;
+				const ws = new WebSocket(`ws://${address}:${teacher.port}`);
 				wsRef.current = ws;
 
+				// Fail fast if we never reach OPEN (matches the "ws timed out" symptom).
+				connectTimeoutRef.current = window.setTimeout(() => {
+					if (ws.readyState !== WebSocket.OPEN) {
+						try {
+							ws.close();
+						} catch {
+							// ignore
+						}
+						setConnecting(false);
+						setConnected(false);
+						setError(PL.connectionError);
+					}
+				}, 8000);
+
 				ws.onopen = () => {
+					if (connectTimeoutRef.current) {
+						window.clearTimeout(connectTimeoutRef.current);
+						connectTimeoutRef.current = null;
+					}
 					// Send join message
 					ws.send(
 						JSON.stringify({
 							type: "join",
-							studentId: crypto.randomUUID(),
+							studentId: studentIdRef.current,
 							studentName: studentName.trim(),
 							timestamp: Date.now()
 						})
@@ -120,6 +145,10 @@ function StudentViewer() {
 				};
 
 				ws.onclose = () => {
+					if (connectTimeoutRef.current) {
+						window.clearTimeout(connectTimeoutRef.current);
+						connectTimeoutRef.current = null;
+					}
 					setConnected(false);
 					if (step === "viewing") {
 						setError("Polaczenie zostalo zamkniete");
@@ -127,6 +156,10 @@ function StudentViewer() {
 				};
 
 				ws.onerror = () => {
+					if (connectTimeoutRef.current) {
+						window.clearTimeout(connectTimeoutRef.current);
+						connectTimeoutRef.current = null;
+					}
 					setError("Blad polaczenia");
 					setConnected(false);
 				};
@@ -251,7 +284,7 @@ function StudentViewer() {
 				wsRef.current.send(
 					JSON.stringify({
 						type: "reaction",
-						studentId: crypto.randomUUID(), // Should use stored ID
+						studentId: studentIdRef.current,
 						reaction: newReaction,
 						timestamp: Date.now()
 					})
