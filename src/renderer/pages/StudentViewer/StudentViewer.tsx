@@ -32,11 +32,11 @@ function StudentViewer() {
 	const [blankMessage, setBlankMessage] = useState("");
 
 	const wsRef = useRef<WebSocket | null>(null);
+	const stepRef = useRef<ViewerStep | "connecting">(step);
+	const studentIdRef = useRef<string | null>(null);
 	const videoRef = useRef<HTMLVideoElement>(null);
 	const peerConnectionRef = useRef<RTCPeerConnection | null>(null);
 	const connectTimeoutRef = useRef<number | null>(null);
-	const stepRef = useRef(step);
-	const studentIdRef = useRef<string | null>(null);
 	const intentionalDisconnectRef = useRef(false);
 	const handleMessageRef = useRef<(message: Record<string, unknown>) => void>(() => undefined);
 
@@ -95,10 +95,11 @@ function StudentViewer() {
 	const disconnect = useCallback(() => {
 		intentionalDisconnectRef.current = true;
 		cleanupTransport();
+		setConnecting(false);
 		setConnected(false);
 		clearAllReactions();
 		setMyReaction(null);
-	}, [cleanupTransport, setConnected, clearAllReactions, setMyReaction]);
+	}, [cleanupTransport, setConnecting, setConnected, clearAllReactions, setMyReaction]);
 
 	// Cleanup on unmount
 	useEffect(() => {
@@ -156,17 +157,28 @@ function StudentViewer() {
 				const ws = new WebSocket(`ws://${host}:${teacher.port}`);
 				wsRef.current = ws;
 
-				// If the socket opens but we never get a welcome, show an error.
+				// Fail fast if we never reach OPEN / welcome.
 				connectTimeoutRef.current = window.setTimeout(() => {
-					if (stepRef.current === "connecting") {
-						setError("Brak odpowiedzi od nauczyciela");
-						setStep("discover");
-						cleanupTransport();
-						setConnected(false);
+					if (stepRef.current !== "connecting") return;
+					if (ws.readyState !== WebSocket.OPEN) {
+						try {
+							ws.close();
+						} catch {
+							// ignore
+						}
 					}
+					setConnecting(false);
+					setConnected(false);
+					setError(PL.connectionError);
+					setStep("discover");
+					cleanupTransport();
 				}, 8000);
 
 				ws.onopen = () => {
+					if (connectTimeoutRef.current) {
+						window.clearTimeout(connectTimeoutRef.current);
+						connectTimeoutRef.current = null;
+					}
 					// Send join message
 					const studentId = getStudentId();
 					ws.send(
@@ -189,6 +201,10 @@ function StudentViewer() {
 				};
 
 				ws.onclose = () => {
+					if (connectTimeoutRef.current) {
+						window.clearTimeout(connectTimeoutRef.current);
+						connectTimeoutRef.current = null;
+					}
 					setConnected(false);
 					clearConnectTimeout();
 					if (!intentionalDisconnectRef.current) {
@@ -205,6 +221,10 @@ function StudentViewer() {
 				};
 
 				ws.onerror = () => {
+					if (connectTimeoutRef.current) {
+						window.clearTimeout(connectTimeoutRef.current);
+						connectTimeoutRef.current = null;
+					}
 					setError("Blad polaczenia");
 					setConnected(false);
 					clearConnectTimeout();
