@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import { useConnection } from "../../context/ConnectionContext";
 import { useReactions } from "../../context/ReactionsContext";
 import { PL, DEFAULT_PORT } from "@shared/constants";
@@ -15,13 +16,10 @@ interface TeacherInfo {
 	port: number;
 }
 
-interface StudentViewerProps {
-	onBack: () => void;
-}
-
 type ViewerStep = "name" | "discover" | "viewing";
 
-function StudentViewer({ onBack }: StudentViewerProps) {
+function StudentViewer() {
+	const navigate = useNavigate();
 	const { isConnected, setConnected, setConnecting, setError, error, reset } = useConnection();
 	const { myReaction, setMyReaction, setReaction, clearAllReactions } = useReactions();
 
@@ -152,13 +150,14 @@ function StudentViewer({ onBack }: StudentViewerProps) {
 					setReaction(message.studentId as string, message.studentId as string, message.reaction as ReactionType);
 					break;
 
-				case "all-reactions":
+				case "all-reactions": {
 					// Handle all reactions
 					const reactions = message.reactions as Record<string, { name: string; reaction: ReactionType }>;
 					Object.entries(reactions).forEach(([id, data]) => {
 						setReaction(id, data.name, data.reaction);
 					});
 					break;
+				}
 
 				case "clear-reactions":
 					clearAllReactions();
@@ -265,15 +264,15 @@ function StudentViewer({ onBack }: StudentViewerProps) {
 	const handleDisconnect = useCallback(() => {
 		disconnect();
 		reset();
-		onBack();
-	}, [disconnect, reset, onBack]);
+		navigate("/");
+	}, [disconnect, reset, navigate]);
 
 	// Name input step
 	if (step === "name") {
 		return (
 			<div className="student-viewer">
 				<div className="student-viewer__setup">
-					<button className="student-viewer__back" onClick={onBack}>
+					<button className="student-viewer__back" onClick={() => navigate("/")}>
 						<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
 							<path d="M19 12H5M12 19l-7-7 7-7" />
 						</svg>

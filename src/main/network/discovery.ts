@@ -57,7 +57,7 @@ export class DiscoveryService extends EventEmitter {
 	 */
 	stopAdvertising(): void {
 		if (this.publishedService) {
-			this.publishedService.stop(() => {
+			this.publishedService.stop?.(() => {
 				console.info("mDNS service stopped");
 			});
 			this.publishedService = null;

@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { useConnection } from "../../context/ConnectionContext";
 import { useReactions } from "../../context/ReactionsContext";
 import { PL, DEFAULT_PORT } from "@shared/constants";
@@ -11,13 +12,12 @@ import AnnotationToolbar from "../../components/AnnotationToolbar/AnnotationTool
 import ConnectionStatus from "../../components/ConnectionStatus/ConnectionStatus";
 import "./TeacherDashboard.scss";
 
-interface TeacherDashboardProps {
-	onBack: () => void;
-}
-
 type SetupStep = "config" | "source" | "streaming";
 
-function TeacherDashboard({ onBack }: TeacherDashboardProps) {
+interface TeacherDashboardProps {}
+
+function TeacherDashboard(props: TeacherDashboardProps) {
+	const navigate = useNavigate();
 	const { isConnected, setConnected, setConnecting, students, setError, error } = useConnection();
 	const { clearAllReactions } = useReactions();
 
@@ -86,11 +86,11 @@ function TeacherDashboard({ onBack }: TeacherDashboardProps) {
 			await window.electronAPI.stopTeacherSession();
 			setConnected(false);
 			clearAllReactions();
-			onBack();
+			navigate("/");
 		} catch (err) {
 			console.error("Error stopping session:", err);
 		}
-	}, [setConnected, clearAllReactions, onBack]);
+	}, [setConnected, clearAllReactions, navigate]);
 
 	const handleClearReactions = useCallback(async () => {
 		try {
@@ -124,7 +124,7 @@ function TeacherDashboard({ onBack }: TeacherDashboardProps) {
 		return (
 			<div className="teacher-dashboard">
 				<div className="teacher-dashboard__setup">
-					<button className="teacher-dashboard__back" onClick={onBack}>
+					<button className="teacher-dashboard__back" onClick={() => navigate("/")}>
 						<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
 							<path d="M19 12H5M12 19l-7-7 7-7" />
 						</svg>

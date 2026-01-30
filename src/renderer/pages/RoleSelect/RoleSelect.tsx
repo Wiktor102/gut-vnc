@@ -1,12 +1,17 @@
+import { useNavigate } from "react-router-dom";
 import { UserRole } from "@shared/types";
 import { PL } from "@shared/constants";
 import "./RoleSelect.scss";
 
-interface RoleSelectProps {
-	onSelectRole: (role: UserRole) => void;
-}
+interface RoleSelectProps {}
 
-function RoleSelect({ onSelectRole }: RoleSelectProps) {
+function RoleSelect(props: RoleSelectProps) {
+	const navigate = useNavigate();
+
+	const handleSelectRole = (role: UserRole) => {
+		sessionStorage.setItem("userRole", role);
+		navigate(`/${role}`);
+	};
 	return (
 		<div className="role-select">
 			<div className="role-select__container">
@@ -16,7 +21,7 @@ function RoleSelect({ onSelectRole }: RoleSelectProps) {
 				</div>
 
 				<div className="role-select__options">
-					<button className="role-select__option role-select__option--teacher" onClick={() => onSelectRole("teacher")}>
+					<button className="role-select__option role-select__option--teacher" onClick={() => handleSelectRole("teacher")}>
 						<div className="role-select__option-icon">
 							<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
 								<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
@@ -36,7 +41,7 @@ function RoleSelect({ onSelectRole }: RoleSelectProps) {
 						</div>
 					</button>
 
-					<button className="role-select__option role-select__option--student" onClick={() => onSelectRole("student")}>
+					<button className="role-select__option role-select__option--student" onClick={() => handleSelectRole("student")}>
 						<div className="role-select__option-icon">
 							<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
 								<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />

@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, desktopCapturer, screen } from "electron";
+import { app, BrowserWindow, screen } from "electron";
 import * as path from "path";
 import { setupIpcHandlers } from "./ipc/handlers";
 
@@ -29,10 +29,10 @@ function createWindow(): void {
 	// Load the app
 	if (isDev) {
 		mainWindow.loadURL("http://localhost:3000");
-		mainWindow.webContents.openDevTools();
 	} else {
 		mainWindow.loadFile(path.join(__dirname, "../renderer/index.html"));
 	}
+	mainWindow.webContents.openDevTools();
 
 	// Show window when ready
 	mainWindow.once("ready-to-show", () => {
