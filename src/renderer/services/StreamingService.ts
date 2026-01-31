@@ -108,8 +108,15 @@ export class StreamingService extends EventEmitter {
 		});
 
 		await pc.setLocalDescription(offer);
-
-		return offer;
+		// pc.localDescription is the canonical form after setLocalDescription.
+		// Return a plain object to ensure it survives structured-clone/JSON.
+		if (!pc.localDescription) {
+			return offer;
+		}
+		return {
+			type: pc.localDescription.type,
+			sdp: pc.localDescription.sdp
+		};
 	}
 
 	/**

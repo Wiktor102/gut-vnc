@@ -36,6 +36,7 @@ function StudentViewer() {
 	const studentIdRef = useRef<string | null>(null);
 	const videoRef = useRef<HTMLVideoElement>(null);
 	const peerConnectionRef = useRef<RTCPeerConnection | null>(null);
+	const pendingIceRef = useRef<RTCIceCandidateInit[]>([]);
 	const connectTimeoutRef = useRef<number | null>(null);
 	const intentionalDisconnectRef = useRef(false);
 	const handleMessageRef = useRef<(message: Record<string, unknown>) => void>(() => undefined);
@@ -247,6 +248,7 @@ function StudentViewer() {
 				iceServers: []
 			});
 			peerConnectionRef.current = pc;
+			pendingIceRef.current = [];
 
 			pc.ontrack = event => {
 				if (videoRef.current && event.streams[0]) {
@@ -266,7 +268,41 @@ function StudentViewer() {
 				}
 			};
 
-			await pc.setRemoteDescription(message.sdp as RTCSessionDescriptionInit);
+			// Normalize SDP payload shapes.
+			// Expected: message.sdp = { type: "offer", sdp: "v=0..." }
+			// But tolerate: message.sdp = "v=0..." or message = { type:"offer", sdp:"v=0..." }
+			const rawSdp = (message as { sdp?: unknown }).sdp;
+			let remoteDesc: RTCSessionDescriptionInit | null = null;
+			if (typeof rawSdp === "string") {
+				remoteDesc = { type: "offer", sdp: rawSdp };
+			} else if (rawSdp && typeof rawSdp === "object") {
+				const obj = rawSdp as { type?: unknown; sdp?: unknown };
+				if (typeof obj.type === "string" && typeof obj.sdp === "string") {
+					remoteDesc = { type: obj.type as RTCSdpType, sdp: obj.sdp };
+				}
+			} else {
+				const top = message as { type?: unknown; sdp?: unknown };
+				if (typeof top.type === "string" && typeof top.sdp === "string") {
+					remoteDesc = { type: top.type as RTCSdpType, sdp: top.sdp };
+				}
+			}
+
+			if (!remoteDesc) {
+				throw new DOMException("Invalid offer SDP payload", "DataError");
+			}
+
+			await pc.setRemoteDescription(remoteDesc);
+
+			// Flush any ICE candidates received before we had a remote description.
+			for (const cand of pendingIceRef.current) {
+				try {
+					await pc.addIceCandidate(new RTCIceCandidate(cand));
+				} catch (err) {
+					console.warn("Failed to apply queued ICE candidate:", err);
+				}
+			}
+			pendingIceRef.current = [];
+
 			const answer = await pc.createAnswer();
 			await pc.setLocalDescription(answer);
 
@@ -286,9 +322,16 @@ function StudentViewer() {
 
 	async function handleIceCandidate(message: Record<string, unknown>) {
 		try {
-			if (peerConnectionRef.current && message.candidate) {
-				await peerConnectionRef.current.addIceCandidate(new RTCIceCandidate(message.candidate as RTCIceCandidateInit));
+			const pc = peerConnectionRef.current;
+			if (!pc || !message.candidate) return;
+
+			// If offer hasn't been applied yet, queue candidates.
+			if (!pc.remoteDescription) {
+				pendingIceRef.current.push(message.candidate as RTCIceCandidateInit);
+				return;
 			}
+
+			await pc.addIceCandidate(new RTCIceCandidate(message.candidate as RTCIceCandidateInit));
 		} catch (err) {
 			console.error("Failed to add ICE candidate:", err);
 		}
