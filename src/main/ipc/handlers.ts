@@ -3,6 +3,7 @@ import { networkInterfaces } from "os";
 import { DiscoveryService } from "../network/discovery";
 import { SignalingServer } from "../network/signaling-server";
 import { ScreenCapture } from "../capture/screen-capture";
+import { ensureWindowsFirewallException } from "../windows/firewall";
 
 function scoreLocalIpv4(address: string, internal: boolean): number {
 	if (internal || address.startsWith("127.")) return -1000;
@@ -94,6 +95,18 @@ export function setupIpcHandlers(): void {
 			try {
 				// Stop any existing services
 				await stopServices();
+
+				// On Windows, ensure Firewall allows inbound connections to the app.
+				// This may trigger a UAC prompt once; if canceled, hosting will likely not work.
+				const fw = await ensureWindowsFirewallException("GUT VNC");
+				if (!fw.success) {
+					return {
+						success: false,
+						error:
+							"Windows Firewall blokuje polaczenia przychodzace. Zezwol aplikacji GUT VNC w Zaporze systemu Windows (moze wymagac uprawnien administratora)." +
+							(fw.message ? `\n\nSzczegoly: ${fw.message}` : "")
+					};
+				}
 
 				// Start signaling server
 				signalingServer = new SignalingServer(config.port, config.address);
