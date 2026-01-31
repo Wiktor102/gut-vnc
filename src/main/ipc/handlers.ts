@@ -135,6 +135,15 @@ export function setupIpcHandlers(): void {
 					});
 				});
 
+				signalingServer.on("webrtc-signal", ({ studentId, message }) => {
+					BrowserWindow.getAllWindows().forEach(win => {
+						win.webContents.send("signaling-message", {
+							...(message as Record<string, unknown>),
+							studentId
+						});
+					});
+				});
+
 				return { success: true, port: config.port };
 			} catch (error) {
 				console.error("Failed to start teacher session:", error);

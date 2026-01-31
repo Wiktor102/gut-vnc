@@ -138,12 +138,23 @@ export class SignalingServer extends EventEmitter {
 				break;
 			case "answer":
 			case "ice-candidate":
-				// Forward WebRTC signaling to teacher (main process)
-				this.emit("webrtc-signal", { clientId, message });
+				// Forward WebRTC signaling to teacher (main process).
+				// Prefer the stable student id (from join) over the per-socket clientId.
+				this.emit("webrtc-signal", {
+					studentId: this.findStudentIdBySocket(ws) ?? clientId,
+					message
+				});
 				break;
 			default:
 				console.warn(`Unknown message type: ${(message as { type: string }).type}`);
 		}
+	}
+
+	private findStudentIdBySocket(ws: WebSocket): string | null {
+		for (const [studentId, client] of this.clients) {
+			if (client.ws === ws) return studentId;
+		}
+		return null;
 	}
 
 	/**

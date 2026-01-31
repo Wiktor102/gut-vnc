@@ -1,15 +1,18 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useMemo, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useConnection } from "../../context/ConnectionContext";
 import { useReactions } from "../../context/ReactionsContext";
 import { PL, DEFAULT_PORT } from "@shared/constants";
 import { ScreenMode } from "@shared/types";
+import { useScreenCapture } from "../../hooks/useScreenCapture";
 import ScreenSourcePicker from "../../components/ScreenSourcePicker/ScreenSourcePicker";
 import StudentList from "../../components/StudentList/StudentList";
 import ReactionDisplay from "../../components/ReactionDisplay/ReactionDisplay";
 import TeacherControls from "../../components/TeacherControls/TeacherControls";
 import AnnotationToolbar from "../../components/AnnotationToolbar/AnnotationToolbar";
 import ConnectionStatus from "../../components/ConnectionStatus/ConnectionStatus";
+import ScreenViewer from "../../components/ScreenViewer/ScreenViewer";
+import { destroyStreamingService, getStreamingService } from "../../services/StreamingService";
 import "./TeacherDashboard.scss";
 
 type SetupStep = "config" | "source" | "streaming";
@@ -21,6 +24,16 @@ function TeacherDashboard(props: TeacherDashboardProps) {
 	const { isConnected, setConnected, setConnecting, students, setError, error } = useConnection();
 	const { clearAllReactions } = useReactions();
 
+	const streamingService = useMemo(() => getStreamingService(), []);
+	const offeredStudentsRef = useRef<Set<string>>(new Set());
+	const {
+		isCapturing,
+		stream: captureStream,
+		error: captureError,
+		startCapture: startLocalCapture,
+		stopCapture: stopLocalCapture
+	} = useScreenCapture();
+
 	const [step, setStep] = useState<SetupStep>("config");
 	const [teacherName, setTeacherName] = useState("");
 	const [roomName, setRoomName] = useState("");
@@ -28,6 +41,83 @@ function TeacherDashboard(props: TeacherDashboardProps) {
 	const [screenMode, setScreenMode] = useState<ScreenMode>("live");
 	const [localIPs, setLocalIPs] = useState<Array<{ address: string; name: string; internal: boolean }>>([]);
 	const [selectedIP, setSelectedIP] = useState<string>("");
+
+	useEffect(() => {
+		if (captureError) setError(captureError);
+	}, [captureError, setError]);
+
+	// Wire StreamingService -> signaling messages
+	useEffect(() => {
+		const onIceCandidate = (payload: unknown) => {
+			const msg = payload as { studentId?: string; candidate?: unknown };
+			if (!msg.studentId || !msg.candidate) return;
+			void window.electronAPI.signalingSendTo(msg.studentId, {
+				type: "ice-candidate",
+				candidate: msg.candidate,
+				timestamp: Date.now()
+			});
+		};
+
+		streamingService.on("ice-candidate", onIceCandidate);
+		return () => {
+			streamingService.off("ice-candidate", onIceCandidate);
+		};
+	}, [streamingService]);
+
+	// Handle answers / ICE coming back from students (forwarded from main)
+	useEffect(() => {
+		const cleanup = window.electronAPI.onSignalingMessage(message => {
+			const m = message as { type?: string; studentId?: string; sdp?: RTCSessionDescriptionInit; candidate?: RTCIceCandidateInit };
+			if (!m.type || !m.studentId) return;
+
+			if (m.type === "answer" && m.sdp) {
+				void streamingService.handleAnswer(m.studentId, m.sdp);
+			}
+			if (m.type === "ice-candidate" && m.candidate) {
+				void streamingService.handleIceCandidate(m.studentId, m.candidate);
+			}
+		});
+		return () => cleanup();
+	}, [streamingService]);
+
+	const sendOfferToStudent = useCallback(
+		async (studentId: string) => {
+			if (offeredStudentsRef.current.has(studentId)) return;
+			if (!captureStream) return;
+
+			try {
+				const offer = await streamingService.createOffer(studentId);
+				await window.electronAPI.signalingSendTo(studentId, {
+					type: "offer",
+					sdp: offer,
+					timestamp: Date.now()
+				});
+				offeredStudentsRef.current.add(studentId);
+			} catch (err) {
+				console.error("Failed to create/send offer:", err);
+			}
+		},
+		[captureStream, streamingService]
+	);
+
+	// Whenever we have a stream and a student list, ensure offers are sent.
+	useEffect(() => {
+		if (!captureStream) return;
+		for (const student of students) {
+			void sendOfferToStudent(student.id);
+		}
+	}, [students, captureStream, sendOfferToStudent]);
+
+	// If a student leaves, allow re-offer on reconnect and close their peer.
+	useEffect(() => {
+		const activeIds = new Set(students.map(s => s.id));
+		for (const offeredId of Array.from(offeredStudentsRef.current)) {
+			if (!activeIds.has(offeredId)) {
+				offeredStudentsRef.current.delete(offeredId);
+				streamingService.closePeer(offeredId);
+			}
+		}
+	}, [students, streamingService]);
 
 	// Get local IPs for display
 	useEffect(() => {
@@ -87,23 +177,29 @@ function TeacherDashboard(props: TeacherDashboardProps) {
 			setSelectedSourceId(sourceId);
 
 			try {
-				const result = await window.electronAPI.startCapture(sourceId);
-				if (result.success) {
-					setConnected(true);
-					setStep("streaming");
-				} else {
-					setError(result.error || "Nie udalo sie uruchomic przechwytywania ekranu");
+				setError(null);
+				const mediaStream = await startLocalCapture(sourceId, { frameRate: 15 });
+				if (!mediaStream) {
+					setError("Nie udalo sie uruchomic przechwytywania ekranu");
+					return;
 				}
+
+				streamingService.setLocalStream(mediaStream);
+				setConnected(true);
+				setStep("streaming");
 			} catch (err) {
+				console.error("Failed to start local capture:", err);
 				setError("Blad podczas uruchamiania przechwytywania");
 			}
 		},
-		[setConnected, setError]
+		[setConnected, setError, startLocalCapture, streamingService]
 	);
 
 	const handleStopSession = useCallback(async () => {
 		try {
-			await window.electronAPI.stopCapture();
+			offeredStudentsRef.current.clear();
+			stopLocalCapture();
+			destroyStreamingService();
 			await window.electronAPI.stopTeacherSession();
 			setConnected(false);
 			clearAllReactions();
@@ -111,7 +207,7 @@ function TeacherDashboard(props: TeacherDashboardProps) {
 		} catch (err) {
 			console.error("Error stopping session:", err);
 		}
-	}, [setConnected, clearAllReactions, navigate]);
+	}, [setConnected, clearAllReactions, navigate, stopLocalCapture]);
 
 	const handleClearReactions = useCallback(async () => {
 		try {
@@ -262,9 +358,17 @@ function TeacherDashboard(props: TeacherDashboardProps) {
 					<div className="teacher-dashboard__preview-content">
 						{screenMode === "blank" ? (
 							<div className="teacher-dashboard__blank-message">{PL.breakMessage}</div>
+						) : captureStream ? (
+							<ScreenViewer
+								stream={captureStream}
+								screenMode={screenMode}
+								annotations={[]}
+								pointerPosition={null}
+								showAnnotations={false}
+							/>
 						) : (
 							<div className="teacher-dashboard__preview-placeholder">
-								<p>Ekran jest udostepniany uczniom</p>
+								<p>{isCapturing ? "Uruchamianie podgladu..." : "Brak podgladu ekranu"}</p>
 								<p className="teacher-dashboard__student-count">
 									{students.length} {students.length === 1 ? "uczen" : "uczniow"} polaczonych
 								</p>
